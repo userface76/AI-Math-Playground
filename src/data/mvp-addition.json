@@ -1,0 +1,17 @@
+{
+  "mvp":"0.1",
+  "grade":1,
+  "concept_id":"addition_within_10",
+  "session_minutes":[5,10],
+  "game_modes":["SUKI_ASKS","CHILD_TEACHES","COOP_SOLVE","FIND_SUKI_ERROR"],
+  "representations":["numbers","stars","fruit","blocks","story","treasure"],
+  "hint_levels":[0,1,2,3],
+  "sample_items":[
+    {"a":2,"b":1,"answer":3,"difficulty":1,"representation":"stars"},
+    {"a":3,"b":2,"answer":5,"difficulty":1,"representation":"fruit"},
+    {"a":4,"b":3,"answer":7,"difficulty":2,"representation":"stars"},
+    {"a":5,"b":3,"answer":8,"difficulty":2,"representation":"blocks"},
+    {"a":6,"b":3,"answer":9,"difficulty":3,"representation":"blocks"},
+    {"a":4,"b":6,"answer":10,"difficulty":3,"representation":"treasure","form":"a_plus_blank_equals_10"}
+  ]
+}

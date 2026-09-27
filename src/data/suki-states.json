@@ -1,0 +1,14 @@
+[
+  {"id":"GREET","order":1,"label":"안녕","use":"첫 만남/재접속"},
+  {"id":"HAPPY","order":2,"label":"활짝 웃음","use":"긍정 반응"},
+  {"id":"CORRECT","order":3,"label":"정답 축하","use":"문제 해결"},
+  {"id":"CHEER","order":4,"label":"응원","use":"도전/재시도"},
+  {"id":"THINK","order":5,"label":"생각 중","use":"기다림/공동 사고"},
+  {"id":"CURIOUS","order":6,"label":"궁금해","use":"질문/탐색"},
+  {"id":"SURPRISE","order":7,"label":"놀람","use":"아이가 수키 오류 발견"},
+  {"id":"RETRY","order":8,"label":"다시 생각","use":"오답 후 재탐색"},
+  {"id":"HINT","order":9,"label":"힌트","use":"도움 제안"},
+  {"id":"EXPLORE","order":10,"label":"탐험","use":"새 미션/새 방식"},
+  {"id":"REST","order":11,"label":"휴식","use":"피로/종료 유도"},
+  {"id":"COMPLETE","order":12,"label":"미션 성공","use":"세션/미션 완료"}
+]

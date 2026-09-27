@@ -1,0 +1,28 @@
+{
+  "currency": {"name":"star","label":"별","loss_on_wrong_answer":false},
+  "star_rewards": {
+    "familiar_success":1,
+    "target_success":2,
+    "challenge_success":3,
+    "find_suki_error_bonus":1,
+    "self_correction_bonus":1
+  },
+  "xp": {"persistent":true,"spendable":false},
+  "levels": [
+    {"level":1,"xp_required":0},
+    {"level":2,"xp_required":20},
+    {"level":3,"xp_required":50},
+    {"level":4,"xp_required":90},
+    {"level":5,"xp_required":140},
+    {"level":6,"xp_required":200},
+    {"level":7,"xp_required":270},
+    {"level":8,"xp_required":350},
+    {"level":9,"xp_required":440},
+    {"level":10,"xp_required":540}
+  ],
+  "unlock_examples": [
+    {"stars":20,"unlock":"bonus_game"},
+    {"stars":50,"unlock":"treasure_chest"},
+    {"stars":100,"unlock":"new_math_world"}
+  ]
+}
