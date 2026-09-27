@@ -1,0 +1,12 @@
+{
+  "version":"0.2.0",
+  "grades":[
+    {"grade":1,"theme":"친구와 발견","worlds":["g1-number","g1-add","g1-sub","g1-shape","g1-compare","g1-time","g1-big-number","g1-final"]},
+    {"grade":2,"theme":"놀이와 확장","worlds":["g2-number","g2-addsub","g2-multiply","g2-length","g2-time","g2-shape","g2-table"]},
+    {"grade":3,"theme":"탐험과 수집","worlds":["g3-addsub","g3-multiply","g3-divide","g3-fraction","g3-measure","g3-geometry","g3-data"]},
+    {"grade":4,"theme":"퀘스트와 발견","worlds":["g4-big-number","g4-muldiv","g4-fraction","g4-decimal","g4-angle","g4-geometry","g4-data"]},
+    {"grade":5,"theme":"전략과 도전","worlds":["g5-mixed","g5-factor","g5-fraction","g5-decimal","g5-shape","g5-volume","g5-data"]},
+    {"grade":6,"theme":"미션과 마스터리","worlds":["g6-fraction","g6-decimal","g6-ratio","g6-proportion","g6-geometry","g6-volume","g6-data"]}
+  ],
+  "progression":{"structure":["grade","world","concept","stage","gameMode","difficulty","reward"],"masteryScale":[0,100],"unlockMastery":70}
+}
