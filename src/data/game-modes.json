@@ -1,0 +1,11 @@
+{
+ "modes":[
+  {"id":"duel","name":"수키와 대결","skills":["fluency","accuracy"],"supports":["number","addition","subtraction","multiplication","division","fraction","decimal"]},
+  {"id":"star-catch","name":"별잡기","skills":["fluency","focus"],"rounds":5,"supports":["number","addition","subtraction","multiplication","division"]},
+  {"id":"missing","name":"빈칸 찾기","skills":["inverse-thinking","reasoning"],"supports":["addition","subtraction","multiplication","division","fraction","decimal"]},
+  {"id":"teach-suki","name":"수키 가르치기","skills":["error-detection","explanation"],"supports":["all"]},
+  {"id":"visual-build","name":"눈으로 만들기","skills":["representation"],"supports":["number","operation","fraction","geometry","measurement"]},
+  {"id":"boss","name":"월드 최종미션","skills":["mixed-mastery"],"supports":["all"]}
+ ],
+ "adaptive":{"easy":{"visualHint":true,"smallerNumbers":true},"fit":{"standardReward":3},"challenge":{"rewardBonus":1,"raiseDifficulty":true}}
+}
