@@ -15,15 +15,23 @@
       <button id="parentBtn" class="icon-btn" aria-label="부모 리포트">📊</button>
     </header>
 
-    <section id="game" class="card">
-      <div id="mascot" class="mascot" aria-label="수키">✨<span>☁️</span>✨</div>
-      <p id="mode" class="mode">수키랑 놀기</p>
-      <h1 id="speech">안녕! 나랑 숫자놀이 할래?</h1>
-      <div id="visual" class="visual">⭐⭐⭐</div>
-      <div id="question" class="question"></div>
-      <div id="answers" class="answers"></div>
-      <button id="startBtn" class="primary">좋아! 시작하자</button>
-      <button id="hintBtn" class="secondary hidden">💡 힌트 줄까?</button>
+    <section id="game" class="card game-stage">
+      <div id="avatarLayer" class="avatar-layer" aria-live="polite">
+        <div class="avatar-shadow"></div>
+        <div id="mascot" class="floating-avatar" aria-label="수키">
+          <img id="sukiImage" alt="수키 AI 친구" hidden />
+          <div id="sukiFallback" class="suki-fallback">✨<span>☁️</span>✨</div>
+        </div>
+      </div>
+      <div class="game-content">
+        <p id="mode" class="mode">수키랑 놀기</p>
+        <h1 id="speech">안녕! 나랑 숫자놀이 할래?</h1>
+        <div id="visual" class="visual">⭐⭐⭐</div>
+        <div id="question" class="question"></div>
+        <div id="answers" class="answers"></div>
+        <button id="startBtn" class="primary">좋아! 시작하자</button>
+        <button id="hintBtn" class="secondary hidden">💡 힌트 줄까?</button>
+      </div>
     </section>
 
     <section id="parentPanel" class="card hidden">
