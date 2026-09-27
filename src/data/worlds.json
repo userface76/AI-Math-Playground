@@ -1,0 +1,14 @@
+{
+ "grade":1,
+ "worlds":[
+  {"id":"g1-number","order":1,"name":"숫자마을","icon":"🌱","concepts":["count-9","read-write-9","order-9"],"stages":["별 세기","숫자 찾기","순서 다리","수키 가르치기","숫자마을 보스"]},
+  {"id":"g1-add","order":2,"name":"덧셈숲","icon":"🌳","concepts":["add-10","make-10","missing-addend"],"stages":["별 합치기","수키와 대결","빈칸 찾기","별잡기","덧셈숲 보스"]},
+  {"id":"g1-sub","order":3,"name":"뺄셈동굴","icon":"🕳️","concepts":["sub-10","missing-sub"],"stages":["사라진 별","동굴 탐색","빈칸 찾기","수키 구하기","뺄셈동굴 보스"]},
+  {"id":"g1-shape","order":4,"name":"모양공장","icon":"🧩","concepts":["plane-shape","solid-shape"],"stages":["같은 모양","모양 조립","분류하기","수키 공장","모양공장 보스"]},
+  {"id":"g1-compare","order":5,"name":"비교왕국","icon":"⚖️","concepts":["compare-number","compare-length","compare-amount"],"stages":["더 큰 수","더 긴 것","더 많은 것","비교 대결","비교왕국 보스"]},
+  {"id":"g1-time","order":6,"name":"시간마을","icon":"🕐","concepts":["clock-hour","daily-time"],"stages":["시계 맞추기","시간 찾기","수키 약속","시간 대결","시간마을 보스"]},
+  {"id":"g1-big-number","order":7,"name":"큰수항구","icon":"🔢","concepts":["numbers-100","tens-ones"],"stages":["숫자 조립","십과 일","큰수 찾기","항구 미션","큰수항구 보스"]},
+  {"id":"g1-final","order":8,"name":"별빛성","icon":"🏰","concepts":["grade1-review"],"stages":["숫자 관문","계산 관문","모양 관문","시간 관문","1학년 최종미션"]}
+ ],
+ "unlock":{"firstWorld":true,"nextWorld":{"mastery":70,"bossClear":true},"fastTrack":{"enabled":true,"diagnosticSuccess":0.85}}
+}
