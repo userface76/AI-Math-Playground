@@ -1,0 +1,7 @@
+{
+ "mastery":{"initial":50,"min":0,"max":100,"bands":[{"min":0,"max":39,"id":"support"},{"min":40,"max":69,"id":"growing"},{"min":70,"max":89,"id":"secure"},{"min":90,"max":100,"id":"mastered"}]},
+ "events":{"correct_no_hint":5,"correct_with_hint":3,"self_correct":4,"teach_suki_success":5,"challenge_success":6,"wrong":-2,"repeated_wrong":-3,"abandon":0},
+ "adaptation":{"threeFastCorrect":"raise","twoWrong":"visualize","threeWrong":"stepDownThenReturn","hintSuccess":"rememberHelpfulRepresentation"},
+ "separation":{"stars":"spendable fun reward","xp":"non-spendable game growth","mastery":"concept learning estimate; not a public leaderboard score"},
+ "privacy":{"childLeaderboard":"nickname-avatar-only","parentView":"concept mastery, attempts, hints, helpful representations"}
+}
