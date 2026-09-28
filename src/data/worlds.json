@@ -1,14 +1,794 @@
 {
- "grade":1,
- "worlds":[
-  {"id":"g1-number","order":1,"name":"숫자마을","icon":"🌱","concepts":["count-9","read-write-9","order-9"],"stages":["별 세기","숫자 찾기","순서 다리","수키 가르치기","숫자마을 보스"]},
-  {"id":"g1-add","order":2,"name":"덧셈숲","icon":"🌳","concepts":["add-10","make-10","missing-addend"],"stages":["별 합치기","수키와 대결","빈칸 찾기","별잡기","덧셈숲 보스"]},
-  {"id":"g1-sub","order":3,"name":"뺄셈동굴","icon":"🕳️","concepts":["sub-10","missing-sub"],"stages":["사라진 별","동굴 탐색","빈칸 찾기","수키 구하기","뺄셈동굴 보스"]},
-  {"id":"g1-shape","order":4,"name":"모양공장","icon":"🧩","concepts":["plane-shape","solid-shape"],"stages":["같은 모양","모양 조립","분류하기","수키 공장","모양공장 보스"]},
-  {"id":"g1-compare","order":5,"name":"비교왕국","icon":"⚖️","concepts":["compare-number","compare-length","compare-amount"],"stages":["더 큰 수","더 긴 것","더 많은 것","비교 대결","비교왕국 보스"]},
-  {"id":"g1-time","order":6,"name":"시간마을","icon":"🕐","concepts":["clock-hour","daily-time"],"stages":["시계 맞추기","시간 찾기","수키 약속","시간 대결","시간마을 보스"]},
-  {"id":"g1-big-number","order":7,"name":"큰수항구","icon":"🔢","concepts":["numbers-100","tens-ones"],"stages":["숫자 조립","십과 일","큰수 찾기","항구 미션","큰수항구 보스"]},
-  {"id":"g1-final","order":8,"name":"별빛성","icon":"🏰","concepts":["grade1-review"],"stages":["숫자 관문","계산 관문","모양 관문","시간 관문","1학년 최종미션"]}
- ],
- "unlock":{"firstWorld":true,"nextWorld":{"mastery":70,"bossClear":true},"fastTrack":{"enabled":true,"diagnosticSuccess":0.85}}
+  "version": "0.3.0",
+  "worlds": [
+    {
+      "grade": 1,
+      "id": "g1-number",
+      "order": 1,
+      "name": "숫자마을",
+      "icon": "🌱",
+      "concepts": [
+        "count-9",
+        "read-write-9",
+        "order-9"
+      ],
+      "stages": [
+        "별 세기",
+        "숫자 찾기",
+        "순서 다리",
+        "수키 가르치기",
+        "숫자마을 보스"
+      ]
+    },
+    {
+      "grade": 1,
+      "id": "g1-add",
+      "order": 2,
+      "name": "덧셈숲",
+      "icon": "🌳",
+      "concepts": [
+        "add-10",
+        "make-10",
+        "missing-addend"
+      ],
+      "stages": [
+        "별 합치기",
+        "수키와 대결",
+        "빈칸 찾기",
+        "별잡기",
+        "덧셈숲 보스"
+      ]
+    },
+    {
+      "grade": 1,
+      "id": "g1-sub",
+      "order": 3,
+      "name": "뺄셈동굴",
+      "icon": "🕳️",
+      "concepts": [
+        "sub-10",
+        "missing-sub"
+      ],
+      "stages": [
+        "사라진 별",
+        "동굴 탐색",
+        "빈칸 찾기",
+        "수키 구하기",
+        "뺄셈동굴 보스"
+      ]
+    },
+    {
+      "grade": 1,
+      "id": "g1-shape",
+      "order": 4,
+      "name": "모양공장",
+      "icon": "🧩",
+      "concepts": [
+        "plane-shape",
+        "solid-shape"
+      ],
+      "stages": [
+        "같은 모양",
+        "모양 조립",
+        "분류하기",
+        "수키 공장",
+        "모양공장 보스"
+      ]
+    },
+    {
+      "grade": 1,
+      "id": "g1-compare",
+      "order": 5,
+      "name": "비교왕국",
+      "icon": "⚖️",
+      "concepts": [
+        "compare-number",
+        "compare-length",
+        "compare-amount"
+      ],
+      "stages": [
+        "더 큰 수",
+        "더 긴 것",
+        "더 많은 것",
+        "비교 대결",
+        "비교왕국 보스"
+      ]
+    },
+    {
+      "grade": 1,
+      "id": "g1-time",
+      "order": 6,
+      "name": "시간마을",
+      "icon": "🕐",
+      "concepts": [
+        "clock-hour",
+        "daily-time"
+      ],
+      "stages": [
+        "시계 맞추기",
+        "시간 찾기",
+        "수키 약속",
+        "시간 대결",
+        "시간마을 보스"
+      ]
+    },
+    {
+      "grade": 1,
+      "id": "g1-big-number",
+      "order": 7,
+      "name": "큰수항구",
+      "icon": "🔢",
+      "concepts": [
+        "numbers-100",
+        "tens-ones"
+      ],
+      "stages": [
+        "숫자 조립",
+        "십과 일",
+        "큰수 찾기",
+        "항구 미션",
+        "큰수항구 보스"
+      ]
+    },
+    {
+      "grade": 1,
+      "id": "g1-final",
+      "order": 8,
+      "name": "별빛성",
+      "icon": "🏰",
+      "concepts": [
+        "grade1-review"
+      ],
+      "stages": [
+        "숫자 관문",
+        "계산 관문",
+        "모양 관문",
+        "시간 관문",
+        "1학년 최종미션"
+      ]
+    },
+    {
+      "grade": 2,
+      "id": "g2-number",
+      "order": 1,
+      "name": "세자리수 도시",
+      "icon": "🏙️",
+      "concepts": [
+        "numbers-1000",
+        "place-value"
+      ],
+      "stages": [
+        "백의 자리",
+        "수 만들기",
+        "수 비교",
+        "숫자 구조대",
+        "도시 보스"
+      ]
+    },
+    {
+      "grade": 2,
+      "id": "g2-addsub",
+      "order": 2,
+      "name": "계산기차역",
+      "icon": "🚂",
+      "concepts": [
+        "add-2digit",
+        "sub-2digit"
+      ],
+      "stages": [
+        "덧셈 승강장",
+        "뺄셈 승강장",
+        "받아올림",
+        "받아내림",
+        "기차역 보스"
+      ]
+    },
+    {
+      "grade": 2,
+      "id": "g2-multiply",
+      "order": 3,
+      "name": "곱셈놀이터",
+      "icon": "🎡",
+      "concepts": [
+        "multiplication-2to9"
+      ],
+      "stages": [
+        "2단 점프",
+        "5단 회전",
+        "구구단 대결",
+        "곱셈 별잡기",
+        "놀이터 보스"
+      ]
+    },
+    {
+      "grade": 2,
+      "id": "g2-length",
+      "order": 4,
+      "name": "길이연구소",
+      "icon": "📏",
+      "concepts": [
+        "cm-m",
+        "compare-length"
+      ],
+      "stages": [
+        "센티미터",
+        "미터",
+        "길이 비교",
+        "측정 미션",
+        "연구소 보스"
+      ]
+    },
+    {
+      "grade": 2,
+      "id": "g2-time",
+      "order": 5,
+      "name": "시계탑",
+      "icon": "⏰",
+      "concepts": [
+        "hour-minute",
+        "elapsed-time"
+      ],
+      "stages": [
+        "몇 시 몇 분",
+        "30분 전후",
+        "시간 계산",
+        "약속 미션",
+        "시계탑 보스"
+      ]
+    },
+    {
+      "grade": 2,
+      "id": "g2-shape",
+      "order": 6,
+      "name": "도형블록섬",
+      "icon": "🧱",
+      "concepts": [
+        "triangle-square-circle",
+        "solid-shape"
+      ],
+      "stages": [
+        "도형 찾기",
+        "도형 만들기",
+        "쌓기나무",
+        "분류 미션",
+        "블록섬 보스"
+      ]
+    },
+    {
+      "grade": 2,
+      "id": "g2-table",
+      "order": 7,
+      "name": "표와그래프 마을",
+      "icon": "📊",
+      "concepts": [
+        "table",
+        "pictograph"
+      ],
+      "stages": [
+        "표 읽기",
+        "자료 정리",
+        "그림그래프",
+        "데이터 미션",
+        "마을 보스"
+      ]
+    },
+    {
+      "grade": 3,
+      "id": "g3-addsub",
+      "order": 1,
+      "name": "큰계산 협곡",
+      "icon": "🏞️",
+      "concepts": [
+        "add-3digit",
+        "sub-3digit"
+      ],
+      "stages": [
+        "세자리 덧셈",
+        "세자리 뺄셈",
+        "어림하기",
+        "계산 대결",
+        "협곡 보스"
+      ]
+    },
+    {
+      "grade": 3,
+      "id": "g3-multiply",
+      "order": 2,
+      "name": "곱셈기지",
+      "icon": "🚀",
+      "concepts": [
+        "2digit-x-1digit",
+        "2digit-x-2digit"
+      ],
+      "stages": [
+        "한자리 곱",
+        "두자리 곱",
+        "곱셈 퍼즐",
+        "기지 미션",
+        "곱셈 보스"
+      ]
+    },
+    {
+      "grade": 3,
+      "id": "g3-divide",
+      "order": 3,
+      "name": "나눗셈 항구",
+      "icon": "⚓",
+      "concepts": [
+        "division-basic",
+        "remainder"
+      ],
+      "stages": [
+        "똑같이 나누기",
+        "몫 찾기",
+        "나머지",
+        "항구 미션",
+        "나눗셈 보스"
+      ]
+    },
+    {
+      "grade": 3,
+      "id": "g3-fraction",
+      "order": 4,
+      "name": "분수정원",
+      "icon": "🍰",
+      "concepts": [
+        "fraction-part",
+        "compare-fraction"
+      ],
+      "stages": [
+        "부분과 전체",
+        "분수 읽기",
+        "크기 비교",
+        "분수 퍼즐",
+        "정원 보스"
+      ]
+    },
+    {
+      "grade": 3,
+      "id": "g3-measure",
+      "order": 5,
+      "name": "측정산맥",
+      "icon": "⛰️",
+      "concepts": [
+        "length-mm-km",
+        "weight-volume"
+      ],
+      "stages": [
+        "mm와 cm",
+        "km와 m",
+        "무게",
+        "들이",
+        "산맥 보스"
+      ]
+    },
+    {
+      "grade": 3,
+      "id": "g3-geometry",
+      "order": 6,
+      "name": "도형성",
+      "icon": "🏯",
+      "concepts": [
+        "angle",
+        "triangle",
+        "rectangle"
+      ],
+      "stages": [
+        "각 찾기",
+        "직각",
+        "삼각형",
+        "사각형",
+        "도형성 보스"
+      ]
+    },
+    {
+      "grade": 3,
+      "id": "g3-data",
+      "order": 7,
+      "name": "데이터항공국",
+      "icon": "🛰️",
+      "concepts": [
+        "bar-chart",
+        "data"
+      ],
+      "stages": [
+        "자료 읽기",
+        "표 만들기",
+        "막대그래프",
+        "분석 미션",
+        "항공국 보스"
+      ]
+    },
+    {
+      "grade": 4,
+      "id": "g4-big-number",
+      "order": 1,
+      "name": "억조 우주",
+      "icon": "🌌",
+      "concepts": [
+        "large-numbers",
+        "rounding"
+      ],
+      "stages": [
+        "만과 억",
+        "조 단위",
+        "수 비교",
+        "어림하기",
+        "우주 보스"
+      ]
+    },
+    {
+      "grade": 4,
+      "id": "g4-muldiv",
+      "order": 2,
+      "name": "연산요새",
+      "icon": "🏰",
+      "concepts": [
+        "multi-digit-mul",
+        "multi-digit-div"
+      ],
+      "stages": [
+        "큰수 곱셈",
+        "큰수 나눗셈",
+        "몫과 나머지",
+        "연산 미션",
+        "요새 보스"
+      ]
+    },
+    {
+      "grade": 4,
+      "id": "g4-fraction",
+      "order": 3,
+      "name": "분수광장",
+      "icon": "🍕",
+      "concepts": [
+        "equivalent-fraction",
+        "fraction-addsub"
+      ],
+      "stages": [
+        "같은 크기 분수",
+        "분수 비교",
+        "분수 덧셈",
+        "분수 뺄셈",
+        "광장 보스"
+      ]
+    },
+    {
+      "grade": 4,
+      "id": "g4-decimal",
+      "order": 4,
+      "name": "소수연구소",
+      "icon": "🔬",
+      "concepts": [
+        "decimal-place",
+        "decimal-addsub"
+      ],
+      "stages": [
+        "소수 한자리",
+        "소수 두자리",
+        "소수 비교",
+        "소수 계산",
+        "연구소 보스"
+      ]
+    },
+    {
+      "grade": 4,
+      "id": "g4-angle",
+      "order": 5,
+      "name": "각도경기장",
+      "icon": "📐",
+      "concepts": [
+        "angle-measure",
+        "angle-calc"
+      ],
+      "stages": [
+        "각도 재기",
+        "예각과 둔각",
+        "각도 계산",
+        "각도 대결",
+        "경기장 보스"
+      ]
+    },
+    {
+      "grade": 4,
+      "id": "g4-geometry",
+      "order": 6,
+      "name": "도형탐험대",
+      "icon": "🧭",
+      "concepts": [
+        "triangle-class",
+        "quadrilateral"
+      ],
+      "stages": [
+        "삼각형 분류",
+        "사각형 분류",
+        "평행과 수직",
+        "도형 추리",
+        "탐험 보스"
+      ]
+    },
+    {
+      "grade": 4,
+      "id": "g4-data",
+      "order": 7,
+      "name": "그래프시티",
+      "icon": "📈",
+      "concepts": [
+        "line-graph",
+        "data-interpret"
+      ],
+      "stages": [
+        "꺾은선그래프",
+        "자료 비교",
+        "그래프 읽기",
+        "분석 미션",
+        "시티 보스"
+      ]
+    },
+    {
+      "grade": 5,
+      "id": "g5-mixed",
+      "order": 1,
+      "name": "혼합계산 아레나",
+      "icon": "⚔️",
+      "concepts": [
+        "mixed-operation",
+        "parentheses"
+      ],
+      "stages": [
+        "덧뺄 혼합",
+        "곱나눗 혼합",
+        "괄호 계산",
+        "전략 대결",
+        "아레나 보스"
+      ]
+    },
+    {
+      "grade": 5,
+      "id": "g5-factor",
+      "order": 2,
+      "name": "약수배수 광산",
+      "icon": "⛏️",
+      "concepts": [
+        "factor",
+        "multiple",
+        "gcf-lcm"
+      ],
+      "stages": [
+        "약수 캐기",
+        "배수 찾기",
+        "최대공약수",
+        "최소공배수",
+        "광산 보스"
+      ]
+    },
+    {
+      "grade": 5,
+      "id": "g5-fraction",
+      "order": 3,
+      "name": "분수전략국",
+      "icon": "🧠",
+      "concepts": [
+        "fraction-addsub-unlike",
+        "fraction-mul"
+      ],
+      "stages": [
+        "통분",
+        "분수 덧셈",
+        "분수 뺄셈",
+        "분수 곱셈",
+        "전략국 보스"
+      ]
+    },
+    {
+      "grade": 5,
+      "id": "g5-decimal",
+      "order": 4,
+      "name": "소수레이스",
+      "icon": "🏎️",
+      "concepts": [
+        "decimal-mul",
+        "decimal-div-basic"
+      ],
+      "stages": [
+        "소수 곱셈",
+        "자리값",
+        "소수 나눗셈",
+        "계산 레이스",
+        "레이스 보스"
+      ]
+    },
+    {
+      "grade": 5,
+      "id": "g5-shape",
+      "order": 5,
+      "name": "합동대칭 기지",
+      "icon": "🪞",
+      "concepts": [
+        "congruence",
+        "symmetry"
+      ],
+      "stages": [
+        "합동",
+        "선대칭",
+        "점대칭",
+        "도형 미션",
+        "기지 보스"
+      ]
+    },
+    {
+      "grade": 5,
+      "id": "g5-volume",
+      "order": 6,
+      "name": "입체연구소",
+      "icon": "🧊",
+      "concepts": [
+        "rectangular-prism",
+        "volume"
+      ],
+      "stages": [
+        "직육면체",
+        "정육면체",
+        "부피",
+        "전개도",
+        "연구소 보스"
+      ]
+    },
+    {
+      "grade": 5,
+      "id": "g5-data",
+      "order": 7,
+      "name": "평균연구센터",
+      "icon": "📊",
+      "concepts": [
+        "average",
+        "possibility"
+      ],
+      "stages": [
+        "평균",
+        "가능성",
+        "자료 비교",
+        "데이터 미션",
+        "센터 보스"
+      ]
+    },
+    {
+      "grade": 6,
+      "id": "g6-fraction",
+      "order": 1,
+      "name": "분수마스터 타워",
+      "icon": "🗼",
+      "concepts": [
+        "fraction-div",
+        "mixed-fraction"
+      ],
+      "stages": [
+        "분수 나눗셈",
+        "대분수",
+        "계산 전략",
+        "마스터 대결",
+        "타워 보스"
+      ]
+    },
+    {
+      "grade": 6,
+      "id": "g6-decimal",
+      "order": 2,
+      "name": "소수마스터랩",
+      "icon": "🧪",
+      "concepts": [
+        "decimal-div",
+        "decimal-mixed"
+      ],
+      "stages": [
+        "소수 나눗셈",
+        "몫 어림",
+        "복합 계산",
+        "랩 미션",
+        "소수 보스"
+      ]
+    },
+    {
+      "grade": 6,
+      "id": "g6-ratio",
+      "order": 3,
+      "name": "비의왕국",
+      "icon": "⚖️",
+      "concepts": [
+        "ratio",
+        "equivalent-ratio"
+      ],
+      "stages": [
+        "비 나타내기",
+        "같은 비",
+        "비교하기",
+        "비 퍼즐",
+        "왕국 보스"
+      ]
+    },
+    {
+      "grade": 6,
+      "id": "g6-proportion",
+      "order": 4,
+      "name": "비례탐험선",
+      "icon": "⛵",
+      "concepts": [
+        "proportion",
+        "proportional-distribution"
+      ],
+      "stages": [
+        "비례식",
+        "비례배분",
+        "생활 문제",
+        "탐험 미션",
+        "탐험선 보스"
+      ]
+    },
+    {
+      "grade": 6,
+      "id": "g6-geometry",
+      "order": 5,
+      "name": "원과각 우주정거장",
+      "icon": "🪐",
+      "concepts": [
+        "circle",
+        "circumference",
+        "area"
+      ],
+      "stages": [
+        "원의 구성",
+        "원주",
+        "원의 넓이",
+        "도형 전략",
+        "정거장 보스"
+      ]
+    },
+    {
+      "grade": 6,
+      "id": "g6-volume",
+      "order": 6,
+      "name": "입체도형 기지",
+      "icon": "📦",
+      "concepts": [
+        "surface-area",
+        "volume-prism"
+      ],
+      "stages": [
+        "겉넓이",
+        "부피",
+        "단위 변환",
+        "입체 미션",
+        "기지 보스"
+      ]
+    },
+    {
+      "grade": 6,
+      "id": "g6-data",
+      "order": 7,
+      "name": "데이터마스터 센터",
+      "icon": "📉",
+      "concepts": [
+        "percentage",
+        "graph-analysis"
+      ],
+      "stages": [
+        "백분율",
+        "그래프 해석",
+        "자료 비교",
+        "종합 분석",
+        "6학년 최종미션"
+      ]
+    }
+  ],
+  "unlock": {
+    "firstWorld": true,
+    "nextWorld": {
+      "mastery": 70,
+      "bossClear": true
+    },
+    "fastTrack": {
+      "enabled": true,
+      "diagnosticSuccess": 0.85
+    }
+  }
 }
