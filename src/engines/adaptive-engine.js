@@ -1,0 +1,6 @@
+window.AdaptiveEngine={
+ ensure(profile,key){if(!profile[key])profile[key]={streak:0,wrongStreak:0,difficulty:1,preferredHelp:'visual',helpWins:{visual:0,counting:0,step:0}};return profile[key]},
+ difficulty(profile,key){return this.ensure(profile,key).difficulty},
+ record(profile,key,{correct,hinted=false,helpType=null}){const p=this.ensure(profile,key);if(correct){p.streak++;p.wrongStreak=0;if(helpType)p.helpWins[helpType]=(p.helpWins[helpType]||0)+1;if(p.streak>=3&&!hinted){p.difficulty=Math.min(3,p.difficulty+1);p.streak=0;return{action:'raise',message:'이건 잘하네! 조금 더 도전해볼까?'}}else{p.streak=0;p.wrongStreak++;if(p.wrongStreak===2)return{action:'visualize',message:'그림으로 같이 볼까?'};if(p.wrongStreak>=3){p.difficulty=Math.max(1,p.difficulty-1);p.wrongStreak=0;return{action:'stepDown',message:'작은 숫자로 한번 성공하고 다시 와보자!'}}const best=Object.entries(p.helpWins).sort((a,b)=>b[1]-a[1])[0];if(best&&best[1]>0)p.preferredHelp=best[0];return{action:'stay'}},
+ help(profile,key){const p=this.ensure(profile,key);return p.wrongStreak>=2?'visual':p.preferredHelp||'visual'}
+};
