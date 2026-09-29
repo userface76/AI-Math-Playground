@@ -28,14 +28,27 @@ function renderWorld(){const w=world();$('worldNumber').textContent=`WORLD ${w.o
 function problem(){return window.ProblemEngine?.make(world().id,difficulty())||{prompt:'1 + 1 = ?',answer:'2',options:['1','2','3','4'],difficulty:1}}
 function choices(ans){const s=new Set([ans]);while(s.size<4)s.add(Math.max(0,Math.min(30,ans-3+Math.floor(Math.random()*7))));return[...s].sort(()=>Math.random()-.5)}function buttons(items,fn){$('answers').innerHTML='';items.forEach(v=>{const b=document.createElement('button');b.className='answer';b.textContent=v;b.onclick=()=>fn(v);$('answers').appendChild(b)})}function modeName(id){return content.modes.find(x=>x.id===id)?.name||id}
 function hideMainScreens(){['home','world','game','leaguePanel','parentPanel'].forEach(id=>$(id)?.classList.add('hidden'))}
-const leagueBots=[
-{name:'별콩',avatar:'🌟',base:930},{name:'루미',avatar:'🌙',base:880},{name:'숫자냥',avatar:'🐱',base:845},{name:'코코',avatar:'🧁',base:805},{name:'모모',avatar:'🐻',base:770},{name:'네오',avatar:'🚀',base:735},{name:'토리',avatar:'🦊',base:700},{name:'피코',avatar:'🐧',base:665},{name:'젤리',avatar:'🍬',base:630},{name:'루나',avatar:'💫',base:595}
-];
+const leagueNameA=['별','달','구름','숫자','수학','반짝','초코','젤리','토리','루미','모모'];
+const leagueNameB=['콩','별','냥','봇','링','팡','꿈','곰','핀'];
+const leagueAvatars=['🌟','🌙','🐱','🧁','🐻','🚀','🦊','🐧','🍬','💫','🦄','🐳','🌈','🎈','🧩'];
+function leagueBots100(){
+  const names=[],bots=[];
+  for(const a of leagueNameA)for(const b of leagueNameB)names.push(a+b);
+  for(let i=0;i<99;i++){
+    const tier=99-i;
+    bots.push({
+      name:names[i%names.length]+(i>=names.length?String(Math.floor(i/names.length)+1):''),
+      avatar:leagueAvatars[i%leagueAvatars.length],
+      base:140+tier*18
+    });
+  }
+  return bots;
+}
 function leagueSeed(){const d=new Date();const key=[d.getFullYear(),d.getMonth()+1,d.getDate(),activeGrade(),currentChild?.current_quarter||1].join('-');let h=0;for(const ch of key)h=(h*31+ch.charCodeAt(0))>>>0;return h}
 function seeded(seed){return function(){seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296}}
 function leaguePlayerScore(){return Math.max(0,Math.round(state.stars*7+state.correct*18+state.level*42+Object.values(state.mastery||{}).reduce((a,b)=>a+Math.max(0,b-50),0)*0.7))}
-function buildLeagueRows(tab){const rand=seeded(leagueSeed());const bots=leagueBots.map(function(b){const wobble=Math.round((rand()-.5)*160);const growth=Math.max(8,Math.round(35+rand()*110));return {...b,bot:true,score:Math.max(120,b.base+wobble),growth:growth}});const me={name:currentChild?.nickname||'나',avatar:currentChild?.avatar_key==='star'?'⭐':currentChild?.avatar_key==='cloud'?'☁️':'🤖',bot:false,score:leaguePlayerScore(),growth:Math.max(0,Math.round((mastery()-50)*2+state.correct*4))};const rows=bots.concat([me]).sort(function(a,b){return tab==='growth'?b.growth-a.growth:b.score-a.score});return rows.map(function(x,i){return {...x,rank:i+1}})}
-function renderLeague(tab){tab=tab||'rank';const rows=buildLeagueRows(tab);const list=$('leagueList');if(!list)return;const q=currentChild?.current_quarter||1;$('leagueScope').textContent=activeGrade()+'학년 · '+q+'분기 · 주간 리그';list.innerHTML='';rows.forEach(function(x){const medal=x.rank===1?'🥇':x.rank===2?'🥈':x.rank===3?'🥉':x.rank;const el=document.createElement('div');el.className='league-row'+(x.rank<=3?' top3':'')+(x.bot?'':' me');const scoreText=tab==='growth'?('+'+x.growth):(x.score.toLocaleString()+'점');const scoreSub=tab==='growth'?'이번 주 성장':'리그 포인트';el.innerHTML='<div class="league-rank">'+medal+'</div><div class="league-avatar">'+x.avatar+'</div><div class="league-person"><b>'+x.name+''+'</b><small>'+activeGrade()+'학년 · '+q+'분기</small></div><div class="league-score"><b>'+scoreText+'</b><small>'+scoreSub+'</small></div>';list.appendChild(el)});const me=rows.find(function(x){return !x.bot});$('myLeagueCard').innerHTML='<div><b>내 순위 · '+me.rank+'위</b><span>이번 주 '+(tab==='growth'?('성장 +'+me.growth):('리그 '+me.score.toLocaleString()+'점'))+'</span></div><strong>'+(me.rank<=3?'🔥':'🚀')+'</strong>'}
+function buildLeagueRows(tab){const rand=seeded(leagueSeed());const bots=leagueBots100().map(function(b){const wobble=Math.round((rand()-.5)*90);const growth=Math.max(8,Math.round(25+rand()*125));return {...b,bot:true,score:Math.max(100,b.base+wobble),growth:growth}});const me={name:currentChild?.nickname||'나',avatar:currentChild?.avatar_key==='star'?'⭐':currentChild?.avatar_key==='cloud'?'☁️':'🤖',bot:false,score:leaguePlayerScore(),growth:Math.max(0,Math.round((mastery()-50)*2+state.correct*4))};const rows=bots.concat([me]).sort(function(a,b){return tab==='growth'?b.growth-a.growth:b.score-a.score});return rows.map(function(x,i){return {...x,rank:i+1}})}
+function renderLeague(tab){tab=tab||'rank';const rows=buildLeagueRows(tab);const list=$('leagueList');if(!list)return;const q=currentChild?.current_quarter||1;$('leagueScope').textContent=activeGrade()+'학년 · '+q+'분기 · 주간 TOP 100';list.innerHTML='';rows.forEach(function(x){const medal=x.rank===1?'🥇':x.rank===2?'🥈':x.rank===3?'🥉':x.rank;const el=document.createElement('div');el.className='league-row'+(x.rank<=3?' top3':'')+(x.bot?'':' me');const scoreText=tab==='growth'?('+'+x.growth):(x.score.toLocaleString()+'점');const scoreSub=tab==='growth'?'이번 주 성장':'리그 포인트';el.innerHTML='<div class="league-rank">'+medal+'</div><div class="league-avatar">'+x.avatar+'</div><div class="league-person"><b>'+x.name+''+'</b><small>'+activeGrade()+'학년 · '+q+'분기</small></div><div class="league-score"><b>'+scoreText+'</b><small>'+scoreSub+'</small></div>';list.appendChild(el)});const me=rows.find(function(x){return !x.bot});$('myLeagueCard').innerHTML='<div><b>내 순위 · '+me.rank+'위</b><span>이번 주 '+(tab==='growth'?('성장 +'+me.growth):('리그 '+me.score.toLocaleString()+'점'))+'</span></div><strong>'+(me.rank<=3?'🔥':'🚀')+'</strong>'}
 function showLeague(){hideMainScreens();$('leaguePanel').classList.remove('hidden');document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.nav==='league')});renderLeague(document.querySelector('.league-tab.active')?.dataset.leagueTab||'rank')}
 function gradeTitle(g){return g+'학년'}
 function updateGradePickers(){document.querySelectorAll('.grade-picker button').forEach(function(btn){btn.classList.toggle('active',Number(btn.dataset.grade)===activeGrade())});const hint=$('gradePickerHint');if(hint)hint.textContent=activeGrade()+'학년 수학으로 보고 있어요'}
