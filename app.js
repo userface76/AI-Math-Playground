@@ -55,12 +55,14 @@ function leaguePlayerScore(){return Math.max(0,Math.round(state.stars*7+state.co
 function buildLeagueRows(tab){const rand=seeded(leagueSeed());const bots=leagueBots100().map(function(b){const wobble=Math.round((rand()-.5)*90);const growth=Math.max(8,Math.round(25+rand()*125));return {...b,bot:true,score:Math.max(100,b.base+wobble),growth:growth}});const me={name:currentChild?.nickname||'나',avatar:currentChild?.avatar_key==='star'?'⭐':currentChild?.avatar_key==='cloud'?'☁️':'🤖',bot:false,score:leaguePlayerScore(),growth:Math.max(0,Math.round((mastery()-50)*2+state.correct*4))};const rows=bots.concat([me]).sort(function(a,b){return tab==='growth'?b.growth-a.growth:b.score-a.score});return rows.map(function(x,i){return {...x,rank:i+1}})}
 function renderLeague(tab){tab=tab||'rank';const rows=buildLeagueRows(tab);const list=$('leagueList');if(!list)return;const q=currentChild?.current_quarter||1;$('leagueScope').textContent=activeGrade()+'학년 · '+q+'분기 · 주간 TOP 100';list.innerHTML='';rows.forEach(function(x){const medal=x.rank===1?'🥇':x.rank===2?'🥈':x.rank===3?'🥉':x.rank;const el=document.createElement('div');el.className='league-row'+(x.rank<=3?' top3':'')+(x.bot?'':' me');const scoreText=tab==='growth'?('+'+x.growth):(x.score.toLocaleString()+'점');const scoreSub=tab==='growth'?'이번 주 성장':'리그 포인트';el.innerHTML='<div class="league-rank">'+medal+'</div><div class="league-avatar">'+x.avatar+'</div><div class="league-person"><b>'+x.name+''+'</b><small>'+activeGrade()+'학년 · '+q+'분기</small></div><div class="league-score"><b>'+scoreText+'</b><small>'+scoreSub+'</small></div>';list.appendChild(el)});const me=rows.find(function(x){return !x.bot});$('myLeagueCard').innerHTML='<div><b>내 순위 · '+me.rank+'위</b><span>이번 주 '+(tab==='growth'?('성장 +'+me.growth):('리그 '+me.score.toLocaleString()+'점'))+'</span></div><strong>'+(me.rank<=3?'🔥':'🚀')+'</strong>'}
 let catchState={running:false,lives:5,score:0,combo:0,level:1,correctCount:0,pace:'slow',answer:0,timer:null,spawnTimer:null};
-const catchRobotPoses={idle:'suki_01_greet.png',correct:'suki_03_correct.png',cheer:'suki_04_cheer.png',think:'suki_05_think.png',surprise:'suki_07_surprise.png',jump:'avatar_08_jump.png',hint:'suki_09_hint.png',complete:'suki_12_complete.png'};
+const catchRobotPoses={idle:'suki_minigame_idle.webp',correct:'suki_minigame_correct.webp',cheer:'suki_04_cheer.png',think:'suki_05_think.png',surprise:'suki_07_surprise.png',jump:'avatar_08_jump.png',hint:'suki_09_hint.png',complete:'suki_12_complete.png'};
 function catchRobotReact(type='idle',message='정답 숫자를 잡아봐!'){
   const wrap=$('catchRobot'),img=$('catchRobotImage'),bubble=$('catchRobotBubble');
   if(!wrap||!img||!bubble)return;
   img.src=SUKI_BASE+(catchRobotPoses[type]||catchRobotPoses.idle);
-  bubble.textContent=message;
+  const embeddedFeedback=type==='correct';
+  bubble.hidden=embeddedFeedback;
+  if(!embeddedFeedback)bubble.textContent=message;
   wrap.classList.remove('react-correct','react-wrong','react-combo','react-start','react-end');
   void wrap.offsetWidth;
   if(type==='correct')wrap.classList.add('react-correct');
@@ -119,7 +121,7 @@ function spawnCatchWave(){
      else if(catchState.combo>0&&catchState.combo%5===0)catchRobotReact('cheer','🔥 '+catchState.combo+'콤보! 최고야!');
      else catchRobotReact('correct',pickCatchPraise());
      updateCatchHud();clearTimeout(catchState.timer);
-     setTimeout(()=>{catchQuestion();spawnCatchWave()},leveled?700:420)
+     const feedbackMs={slow:950,normal:800,fast:650}[catchState.pace]||950;setTimeout(()=>{catchRobotReact('idle','다음 문제! 정답 숫자를 잡아봐!');catchQuestion();spawnCatchWave()},leveled?1100:feedbackMs)
    }else{btn.classList.add('catch-wrong');catchRobotReact('surprise','앗! 다시 잘 보고 잡아보자!');loseCatchLife()}};
    arena.appendChild(btn);
  });
