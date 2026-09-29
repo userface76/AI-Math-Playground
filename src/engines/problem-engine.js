@@ -16,9 +16,19 @@ function fractionChoices(n,d){
   return shuffle([correct,...new Set(pool)]).slice(0,4);
 }
 function opts(ans,extras=[]){const s=new Set([String(ans),...extras.map(String)]);let guard=0;while(s.size<4&&guard++<30){if(/^\d+(\.\d+)?$/.test(String(ans))){const n=Number(ans),delta=pick([-3,-2,-1,1,2,3]);s.add(String(Math.max(0,Math.round((n+delta)*100)/100)))}else s.add(String(ans)+'?')}return shuffle([...s]).slice(0,4)}
-function make(worldId,d=1){
+function make(worldId,d=1,concept=null){
  let a,b,ans,prompt,visual='',wrongAnswer,options,missingPrompt,missingAnswer;
- if(worldId==='g1-number'){ans=r(1,9);prompt='별을 세어 보세요. 모두 몇 개인가요?';visual='⭐'.repeat(ans);options=opts(ans)}
+ if(worldId==='g1-number'){
+   const use=concept==='grade1-number-review'?pick(['count-9','read-write-9','order-9']):(concept||'count-9');
+   if(use==='read-write-9'){
+     const words=['영','일','이','삼','사','오','육','칠','팔','구'];
+     ans=r(1,9);prompt=`'${words[ans]}'을 숫자로 나타낸 것을 고르세요.`;options=opts(ans);visual='🔢';
+   }else if(use==='order-9'){
+     a=r(1,6);ans=a+2;prompt=`${a}, ${a+1}, □, ${a+3} 순서에서 빈칸에 들어갈 수를 고르세요.`;options=opts(ans);visual='➡️';
+   }else{
+     ans=r(1,9);prompt='별을 세어 보세요. 모두 몇 개인가요?';visual='⭐'.repeat(ans);options=opts(ans);
+   }
+ }
  else if(worldId==='g1-add'||worldId==='g1-final'){a=r(1,d===1?5:9);b=r(1,10-a);ans=a+b;prompt=`${a} + ${b} = ?`;visual='🔵'.repeat(a)+'  '+'🟡'.repeat(b);options=opts(ans);missingPrompt=`${a} + □ = ${ans}`;missingAnswer=b}
  else if(worldId==='g1-sub'){a=r(5,10);b=r(1,a);ans=a-b;prompt=`${a} - ${b} = ?`;options=opts(ans);missingPrompt=`${a} - □ = ${ans}`;missingAnswer=b}
  else if(worldId==='g1-shape'){const q=pick([{p:'세모의 변은 몇 개인가요?',a:3},{p:'네모의 변은 몇 개인가요?',a:4},{p:'동그라미에는 꼭짓점이 몇 개인가요?',a:0}]);prompt=q.p;ans=q.a;options=opts(ans)}
