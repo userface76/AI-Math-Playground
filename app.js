@@ -32,7 +32,7 @@ function isWorldUnlocked(w){if(w.order===1)return true;const prev=gradeWorlds().
 function stageConcept(w,i){if(w.id==='g1-number'){return ['count-9','read-write-9','order-9','read-write-9','grade1-number-review'][i]||'count-9'}return w.concepts[Math.min(i,w.concepts.length-1)]||w.concepts[0]}function renderWorld(){const w=world();$('worldNumber').textContent=`WORLD ${w.order}`;$('worldTitle').textContent=`${w.icon} ${w.name}`;$('worldCopy').textContent='수키가 네 플레이를 보면서 딱 맞는 난이도를 찾아줄게!';$('worldTabs').innerHTML='';gradeWorlds().forEach(x=>{const b=document.createElement('button');b.className='world-tab'+(x.id===w.id?' active':'');b.textContent=isWorldUnlocked(x)?`${x.icon}${x.order}`:`🔒${x.order}`;b.disabled=!isWorldUnlocked(x);b.onclick=()=>{state.currentWorld=x.id;renderWorld();save()};$('worldTabs').appendChild(b)});$('stageMap').innerHTML='';w.stages.forEach((name,i)=>{const b=document.createElement('button'),mode=content.modes[i%Math.max(1,content.modes.length)]?.id||fallbackModes[i%4],d=window.AdaptiveEngine?.difficulty(state.adaptive,`${w.id}:${mode}`)||1;b.className='stage unlocked';b.innerHTML=`<b>${i+1}</b><span>${name}</span><small>${i===w.stages.length-1?'월드 최종미션':`숙련도 ${state.mastery[`${w.id}:${mode}`]??50}% · 난이도 ${d}`}</small>`;const concept=stageConcept(w,i);b.onclick=()=>openGame(mode,concept,i);$('stageMap').appendChild(b)})}
 function problem(){if(state.gameType==='daily-mission')return missionProblem();return window.ProblemEngine?.make(world().id,difficulty(),state.currentConcept)||{prompt:'1 + 1 = ?',answer:'2',options:['1','2','3','4'],difficulty:1}}
 function choices(ans){const s=new Set([ans]);while(s.size<4)s.add(Math.max(0,Math.min(30,ans-3+Math.floor(Math.random()*7))));return[...s].sort(()=>Math.random()-.5)}function buttons(items,fn){$('answers').innerHTML='';items.forEach(v=>{const b=document.createElement('button');b.className='answer';b.textContent=v;b.onclick=()=>fn(v);$('answers').appendChild(b)})}function modeName(id){return content.modes.find(x=>x.id===id)?.name||id}
-function hideMainScreens(){['home','world','game','leaguePanel','parentPanel'].forEach(id=>$(id)?.classList.add('hidden'))}
+function hideMainScreens(){stopNumberCatch(false);['home','world','game','playPanel','leaguePanel','parentPanel'].forEach(id=>$(id)?.classList.add('hidden'))}
 const leagueNameA=['별','달','구름','숫자','수학','반짝','초코','젤리','토리','루미','모모'];
 const leagueNameB=['콩','별','냥','봇','링','팡','꿈','곰','핀'];
 const leagueAvatars=['🌟','🌙','🐱','🧁','🐻','🚀','🦊','🐧','🍬','💫','🦄','🐳','🌈','🎈','🧩'];
@@ -54,6 +54,39 @@ function seeded(seed){return function(){seed=(Math.imul(seed,1664525)+1013904223
 function leaguePlayerScore(){return Math.max(0,Math.round(state.stars*7+state.correct*18+state.level*42+Object.values(state.mastery||{}).reduce((a,b)=>a+Math.max(0,b-50),0)*0.7))}
 function buildLeagueRows(tab){const rand=seeded(leagueSeed());const bots=leagueBots100().map(function(b){const wobble=Math.round((rand()-.5)*90);const growth=Math.max(8,Math.round(25+rand()*125));return {...b,bot:true,score:Math.max(100,b.base+wobble),growth:growth}});const me={name:currentChild?.nickname||'나',avatar:currentChild?.avatar_key==='star'?'⭐':currentChild?.avatar_key==='cloud'?'☁️':'🤖',bot:false,score:leaguePlayerScore(),growth:Math.max(0,Math.round((mastery()-50)*2+state.correct*4))};const rows=bots.concat([me]).sort(function(a,b){return tab==='growth'?b.growth-a.growth:b.score-a.score});return rows.map(function(x,i){return {...x,rank:i+1}})}
 function renderLeague(tab){tab=tab||'rank';const rows=buildLeagueRows(tab);const list=$('leagueList');if(!list)return;const q=currentChild?.current_quarter||1;$('leagueScope').textContent=activeGrade()+'학년 · '+q+'분기 · 주간 TOP 100';list.innerHTML='';rows.forEach(function(x){const medal=x.rank===1?'🥇':x.rank===2?'🥈':x.rank===3?'🥉':x.rank;const el=document.createElement('div');el.className='league-row'+(x.rank<=3?' top3':'')+(x.bot?'':' me');const scoreText=tab==='growth'?('+'+x.growth):(x.score.toLocaleString()+'점');const scoreSub=tab==='growth'?'이번 주 성장':'리그 포인트';el.innerHTML='<div class="league-rank">'+medal+'</div><div class="league-avatar">'+x.avatar+'</div><div class="league-person"><b>'+x.name+''+'</b><small>'+activeGrade()+'학년 · '+q+'분기</small></div><div class="league-score"><b>'+scoreText+'</b><small>'+scoreSub+'</small></div>';list.appendChild(el)});const me=rows.find(function(x){return !x.bot});$('myLeagueCard').innerHTML='<div><b>내 순위 · '+me.rank+'위</b><span>이번 주 '+(tab==='growth'?('성장 +'+me.growth):('리그 '+me.score.toLocaleString()+'점'))+'</span></div><strong>'+(me.rank<=3?'🔥':'🚀')+'</strong>'}
+let catchState={running:false,lives:5,score:0,combo:0,level:1,answer:0,timer:null,spawnTimer:null};
+function showPlay(){hideMainScreens();$('playPanel')?.classList.remove('hidden');$('playMenu')?.classList.remove('hidden');$('numberCatch')?.classList.add('hidden');document.querySelectorAll('.nav-item').forEach(x=>x.classList.toggle('active',x.dataset.nav==='play'))}
+function catchQuestion(){
+ const grade=activeGrade();let a,b,op='+',answer;
+ if(grade<=1){a=1+Math.floor(Math.random()*9);b=1+Math.floor(Math.random()*Math.max(1,10-a));answer=a+b}
+ else if(grade===2){if(Math.random()<.55){a=2+Math.floor(Math.random()*8);b=2+Math.floor(Math.random()*8);op='×';answer=a*b}else{a=10+Math.floor(Math.random()*40);b=1+Math.floor(Math.random()*20);answer=a+b}}
+ else if(grade===3){if(Math.random()<.5){b=2+Math.floor(Math.random()*8);answer=2+Math.floor(Math.random()*10);a=b*answer;op='÷'}else{a=10+Math.floor(Math.random()*40);b=2+Math.floor(Math.random()*8);op='×';answer=a*b}}
+ else {a=10+Math.floor(Math.random()*80);b=2+Math.floor(Math.random()*18);if(Math.random()<.5){op='+';answer=a+b}else{op='-';if(b>a)[a,b]=[b,a];answer=a-b}}
+ catchState.answer=answer;$('catchQuestion').textContent=a+' '+op+' '+b+' = ?';
+}
+function updateCatchHud(){$('catchLives').textContent='❤️'.repeat(catchState.lives)+'♡'.repeat(Math.max(0,5-catchState.lives));$('catchScore').textContent=catchState.score+'점';$('catchCombo').textContent='콤보 '+catchState.combo}
+function catchChoices(){const s=new Set([catchState.answer]);while(s.size<4){const delta=[-3,-2,-1,1,2,3,4][Math.floor(Math.random()*7)];s.add(Math.max(0,catchState.answer+delta))}return [...s].sort(()=>Math.random()-.5)}
+function spawnCatchWave(){
+ if(!catchState.running)return;
+ const arena=$('catchArena');if(!arena)return;
+ arena.innerHTML='';
+ const vals=catchChoices(),correctIndex=vals.indexOf(catchState.answer);
+ vals.forEach((v,i)=>{
+   const btn=document.createElement('button');btn.className='fall-number';btn.textContent=v;btn.style.left=(8+i*23+Math.floor(Math.random()*6))+'%';
+   const duration=Math.max(2.4,5.4-catchState.level*.28);btn.style.animationDuration=duration+'s';
+   btn.dataset.correct=String(i===correctIndex);
+   btn.onclick=()=>{if(!catchState.running)return;if(btn.dataset.correct==='true'){btn.classList.add('catch-hit');catchState.score+=10+catchState.combo*2;catchState.combo++;if(catchState.score>=catchState.level*80)catchState.level++;updateCatchHud();clearTimeout(catchState.timer);setTimeout(()=>{catchQuestion();spawnCatchWave()},220)}else{btn.classList.add('catch-wrong');loseCatchLife()}};
+   arena.appendChild(btn);
+ });
+ clearTimeout(catchState.timer);
+ const missMs=Math.max(2500,5400-catchState.level*280);
+ catchState.timer=setTimeout(()=>{if(!catchState.running)return;loseCatchLife();if(catchState.running){catchQuestion();spawnCatchWave()}},missMs);
+}
+function loseCatchLife(){catchState.lives--;catchState.combo=0;updateCatchHud();$('catchArena')?.classList.add('catch-flash');setTimeout(()=>$('catchArena')?.classList.remove('catch-flash'),260);if(catchState.lives<=0)endNumberCatch()}
+function startNumberCatch(){catchState={running:true,lives:5,score:0,combo:0,level:1,answer:0,timer:null,spawnTimer:null};$('catchStartBtn').classList.add('hidden');$('catchQuitBtn').classList.remove('hidden');catchQuestion();updateCatchHud();spawnCatchWave()}
+function endNumberCatch(){catchState.running=false;clearTimeout(catchState.timer);$('catchArena').innerHTML='<div style="display:grid;place-items:center;height:100%;font-weight:1000;font-size:26px;color:#fff;text-align:center">게임 종료!<br><span style="font-size:18px">점수 '+catchState.score+'점</span></div>';$('catchStartBtn').textContent='다시 하기';$('catchStartBtn').classList.remove('hidden');$('catchQuitBtn').classList.remove('hidden');state.stars+=Math.floor(catchState.score/50);state.xp+=Math.min(40,Math.floor(catchState.score/10));while(state.xp>=100){state.xp-=100;state.level++}updateHud()}
+function stopNumberCatch(resetView=true){if(catchState?.timer)clearTimeout(catchState.timer);if(catchState)catchState.running=false;if(resetView&&$('catchArena'))$('catchArena').innerHTML=''}
+function openNumberCatch(){hideMainScreens();$('playPanel')?.classList.remove('hidden');$('playMenu')?.classList.add('hidden');$('numberCatch')?.classList.remove('hidden');$('catchArena').innerHTML='';$('catchStartBtn').textContent='게임 시작';$('catchStartBtn').classList.remove('hidden');$('catchQuitBtn').classList.add('hidden');catchState={running:false,lives:5,score:0,combo:0,level:1,answer:0,timer:null,spawnTimer:null};catchQuestion();updateCatchHud()}
 function showLeague(){hideMainScreens();$('leaguePanel').classList.remove('hidden');document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.nav==='league')});renderLeague(document.querySelector('.league-tab.active')?.dataset.leagueTab||'rank')}
 function gradeTitle(g){return g+'학년'}
 function updateGradePickers(){document.querySelectorAll('.grade-picker button').forEach(function(btn){btn.classList.toggle('active',Number(btn.dataset.grade)===activeGrade())});const hint=$('gradePickerHint');if(hint)hint.textContent=activeGrade()+'학년 수학으로 보고 있어요'}
@@ -73,8 +106,13 @@ $('homeStartBtn')?.addEventListener('click',showMap);
 $('worldOpenBtn')?.addEventListener('click',showMap);
 $('missionRewardBtn')?.addEventListener('click',startDailyMission);
 document.querySelectorAll('[data-home-nav]').forEach(btn=>btn.addEventListener('click',()=>{const target=btn.dataset.homeNav;const nav=document.querySelector(`.nav-item[data-nav="${target}"]`);nav?.click()}));
-document.querySelectorAll('.nav-item').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));btn.classList.add('active');const target=btn.dataset.nav;if(target==='world'){showHome();return}if(target==='league'){showLeague();return}authNotice(target==='play'?'수학 놀이 화면을 준비 중이에요!':'보물 도감을 준비 중이에요!','info')}));
+document.querySelectorAll('.nav-item').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));btn.classList.add('active');const target=btn.dataset.nav;if(target==='world'){showHome();return}if(target==='play'){showPlay();return}if(target==='league'){showLeague();return}authNotice('보물 도감을 준비 중이에요!','info')}));
 
 document.querySelectorAll('.league-tab').forEach(function(btn){btn.addEventListener('click',function(){document.querySelectorAll('.league-tab').forEach(function(x){x.classList.remove('active')});btn.classList.add('active');renderLeague(btn.dataset.leagueTab)})});
 
 document.querySelectorAll('.grade-picker button').forEach(function(btn){btn.addEventListener('click',function(){selectGrade(btn.dataset.grade)})});
+
+$('numberCatchCard')?.addEventListener('click',openNumberCatch);
+$('catchStartBtn')?.addEventListener('click',startNumberCatch);
+$('catchQuitBtn')?.addEventListener('click',showPlay);
+$('catchBackBtn')?.addEventListener('click',showPlay);
