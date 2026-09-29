@@ -120,3 +120,98 @@
 }
 
 .play-screen{padding:18px;background:linear-gradient(180deg,#f8f4ff,#eef8ff 52%,#fff)}.play-head h1{margin:4px 0 6px;font-size:26px}.play-head p:last-child{margin:0 0 16px;color:#7f7897;font-size:13px}.play-game-card{width:100%;border:0;border-radius:22px;background:linear-gradient(145deg,#fff2fb,#eef8ff);display:grid;grid-template-columns:58px 1fr 22px;gap:12px;align-items:center;text-align:left;padding:16px;box-shadow:0 10px 26px #5d4ea21a}.play-game-icon{width:58px;height:58px;border-radius:18px;display:grid;place-items:center;background:#fff;font-size:32px}.play-game-card b,.play-game-card span,.play-game-card small{display:block}.play-game-card b{font-size:18px;color:#32287c}.play-game-card span{font-size:12px;color:#5f587b;margin-top:4px}.play-game-card small{font-size:10px;color:#9a92ad;margin-top:5px}.play-game-card i{font-style:normal;font-size:28px;color:#7658df}.number-catch{display:grid;gap:12px}.catch-top{display:flex;justify-content:space-between;align-items:center}.catch-stats{display:flex;gap:8px;align-items:center;font-size:10px}.catch-stats span{letter-spacing:-3px}.catch-stats b{font-size:12px;color:#3d3187}.catch-stats em{font-style:normal;color:#ff6aa5;font-weight:900}.catch-arena{position:relative;height:430px;border-radius:24px;overflow:hidden;background:linear-gradient(180deg,#5f8fff 0,#8ed2ff 42%,#dff5ff 100%);box-shadow:inset 0 0 0 3px #ffffff70}.catch-arena:before{content:"✦   ✧   ★   ✦";position:absolute;left:18px;right:18px;top:18px;color:#fff9;font-size:18px;letter-spacing:34px;pointer-events:none}.fall-number{position:absolute;top:-64px;width:58px;height:58px;border:0;border-radius:50%;display:grid;place-items:center;background:#fff;color:#352c83;font-size:25px;font-weight:1000;box-shadow:0 8px 0 #d9d2ff,0 12px 20px #3458a635;cursor:pointer;animation-name:numberFall;animation-timing-function:linear;animation-fill-mode:forwards}.fall-number.correct-target{box-shadow:0 8px 0 #d9d2ff,0 12px 20px #3458a635}.fall-number:active{transform:scale(.92)}.catch-question-wrap{background:#fff;border-radius:20px;padding:14px 16px;text-align:center;box-shadow:0 8px 20px #5f4da817}.catch-question-wrap span{display:block;font-size:11px;color:#88809f;font-weight:800}.catch-question-wrap strong{display:block;font-size:32px;color:#302775;margin-top:4px}.catch-hit{animation:catchHit .28s ease-out forwards}.catch-wrong{animation:catchWrong .35s ease-out}.catch-flash{animation:catchFlash .25s ease-out}@keyframes numberFall{from{transform:translateY(0) rotate(0)}to{transform:translateY(500px) rotate(18deg)}}@keyframes catchHit{to{transform:scale(1.35);opacity:0}}@keyframes catchWrong{30%{transform:translateX(-5px)}60%{transform:translateX(5px)}}@keyframes catchFlash{50%{box-shadow:inset 0 0 0 8px #fff6b8}}@media(max-width:390px){.catch-arena{height:390px}.fall-number{width:52px;height:52px;font-size:22px}.catch-question-wrap strong{font-size:28px}}
+
+/* Suki reaction animation inside Number Catch */
+.catch-robot{
+  position:absolute;
+  left:8px;
+  bottom:8px;
+  width:108px;
+  height:132px;
+  z-index:3;
+  pointer-events:none;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  transform-origin:50% 100%;
+}
+.catch-robot img{
+  width:92px;
+  height:104px;
+  object-fit:contain;
+  filter:drop-shadow(0 10px 10px #334f9a45);
+}
+.catch-robot-bubble{
+  position:absolute;
+  left:76px;
+  bottom:74px;
+  min-width:128px;
+  max-width:190px;
+  padding:8px 10px;
+  border-radius:14px 14px 14px 4px;
+  background:#ffffffee;
+  color:#3b307d;
+  font-size:10px;
+  font-weight:900;
+  line-height:1.25;
+  box-shadow:0 7px 18px #36519a26;
+}
+.catch-robot-bubble:before{
+  content:"";
+  position:absolute;
+  left:-7px;
+  bottom:9px;
+  border:6px solid transparent;
+  border-right-color:#ffffffee;
+}
+.fall-number{z-index:8}
+.catch-end-card{
+  position:absolute;
+  inset:90px 36px auto;
+  z-index:12;
+  background:#ffffffea;
+  border-radius:22px;
+  padding:22px 14px;
+  text-align:center;
+  color:#31267f;
+  box-shadow:0 14px 30px #3f57a33b;
+}
+.catch-end-card b,.catch-end-card span{display:block}
+.catch-end-card b{font-size:25px}
+.catch-end-card span{margin-top:6px;font-size:17px;font-weight:900}
+.catch-robot.react-start{animation:robotHello .65s ease-out}
+.catch-robot.react-correct{animation:robotCorrect .55s ease-out}
+.catch-robot.react-wrong{animation:robotWrong .48s ease-out}
+.catch-robot.react-combo{animation:robotCombo .75s ease-out}
+.catch-robot.react-end{animation:robotEnd .9s ease-out}
+@keyframes robotHello{
+  0%{transform:translateY(8px) scale(.92)}
+  55%{transform:translateY(-8px) rotate(-5deg) scale(1.04)}
+  100%{transform:none}
+}
+@keyframes robotCorrect{
+  0%,100%{transform:none}
+  45%{transform:translateY(-22px) rotate(8deg) scale(1.08)}
+}
+@keyframes robotWrong{
+  0%,100%{transform:none}
+  25%{transform:rotate(-7deg) translateX(-4px)}
+  55%{transform:rotate(7deg) translateX(4px)}
+}
+@keyframes robotCombo{
+  0%{transform:none}
+  35%{transform:translateY(-30px) rotate(-10deg) scale(1.12)}
+  65%{transform:translateY(-20px) rotate(10deg) scale(1.1)}
+  100%{transform:none}
+}
+@keyframes robotEnd{
+  0%{transform:scale(.9)}
+  35%{transform:translateY(-25px) scale(1.12)}
+  70%{transform:translateY(-6px) rotate(6deg)}
+  100%{transform:none}
+}
+@media(max-width:390px){
+  .catch-robot{width:92px;height:116px}
+  .catch-robot img{width:78px;height:90px}
+  .catch-robot-bubble{left:63px;bottom:64px;min-width:112px;max-width:155px;font-size:9px}
+}
