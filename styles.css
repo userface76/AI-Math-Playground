@@ -245,8 +245,12 @@
 .hexa-progress div{height:100%;width:0;background:linear-gradient(90deg,#6659e8,#f469ad);border-radius:inherit;transition:width .2s ease}
 .hexa-target{text-align:center;font-size:12px;color:#81799c;font-weight:800}
 .hexa-target strong{display:inline-grid;place-items:center;min-width:38px;height:38px;margin-left:6px;border-radius:14px;background:#302978;color:#fff;font-size:21px}
-.hexa-board{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;padding:12px 5px 15px;border-radius:24px;background:linear-gradient(180deg,#eef8ff,#f7f1ff)}
-.hex-number{aspect-ratio:1.08;border:0;clip-path:polygon(25% 5%,75% 5%,100% 50%,75% 95%,25% 95%,0 50%);background:linear-gradient(145deg,#fff,#dff4ff);color:#332b82;font-size:20px;font-weight:1000;box-shadow:inset 0 -5px 0 #c8d9ff;cursor:pointer;transition:transform .12s ease,opacity .18s ease}
+.hexa-board{--hex-size:66px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:260px;padding:22px 8px 26px;border-radius:24px;background:linear-gradient(180deg,#eef8ff,#f7f1ff);overflow:hidden}
+.hexa-board.hexa-dense{--hex-size:54px}
+.hexa-row{display:flex;justify-content:center;gap:3px;margin-top:-11px}
+.hexa-row:first-child{margin-top:0}
+.hexa-row-offset{transform:translateX(calc(var(--hex-size) * .5))}
+.hex-number{width:var(--hex-size);height:calc(var(--hex-size) * .88);flex:0 0 var(--hex-size);border:0;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:linear-gradient(145deg,#fff,#dff4ff);color:#332b82;font-size:20px;font-weight:1000;box-shadow:inset 0 -5px 0 #c8d9ff;cursor:pointer;transition:transform .12s ease,opacity .18s ease}
 .hex-number:active{transform:scale(.91)}
 .hex-number.hex-done{background:linear-gradient(145deg,#fff8bd,#ffdc78);color:#7e5100;opacity:.28;transform:scale(.86)}
 .hex-number.hex-wrong{animation:hexWrong .32s ease}
@@ -281,4 +285,14 @@
   .tower-board{min-height:270px;padding-left:2px;padding-right:2px}
   .tower-row{gap:3px}.tower-tile{width:36px;height:42px;font-size:16px;border-radius:9px}
   .tower-tray{gap:3px}.tower-slot{font-size:15px;border-radius:8px}
+}
+
+.hexa-actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.72fr);gap:8px}
+.hexa-actions .primary,.hexa-actions .quit-btn{margin:0}
+@media(max-width:390px){
+  .hexa-board{--hex-size:58px;min-height:235px;padding-left:4px;padding-right:4px}
+  .hexa-board.hexa-dense{--hex-size:47px}
+  .hexa-row{gap:2px;margin-top:-9px}
+  .hex-number{font-size:17px}
+  .hexa-actions{grid-template-columns:1fr}
 }
