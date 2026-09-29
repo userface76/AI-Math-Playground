@@ -53,7 +53,12 @@
       <button id="catchBackBtn" class="back-btn">‹ 놀이</button>
       <div class="catch-stats"><span id="catchLives">❤️❤️❤️❤️❤️</span><b id="catchScore">0점</b><em id="catchCombo">콤보 0</em></div>
     </div>
-    <div id="catchArena" class="catch-arena" aria-label="떨어지는 숫자 게임 영역"></div>
+    <div id="catchArena" class="catch-arena" aria-label="떨어지는 숫자 게임 영역">
+      <div id="catchRobot" class="catch-robot" aria-live="polite">
+        <img id="catchRobotImage" src="public/assets/suki/suki_01_greet.png" alt="수키 로봇"/>
+        <div id="catchRobotBubble" class="catch-robot-bubble">정답 숫자를 잡아봐!</div>
+      </div>
+    </div>
     <div class="catch-question-wrap">
       <span>정답 숫자를 터치!</span>
       <strong id="catchQuestion">5 + 4 = ?</strong>
