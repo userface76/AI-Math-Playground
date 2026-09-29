@@ -6,12 +6,12 @@ const frac=(n,d)=>`${n}/${d}`;
 function opts(ans,extras=[]){const s=new Set([String(ans),...extras.map(String)]);let guard=0;while(s.size<4&&guard++<30){if(/^\d+(\.\d+)?$/.test(String(ans))){const n=Number(ans),delta=pick([-3,-2,-1,1,2,3]);s.add(String(Math.max(0,Math.round((n+delta)*100)/100)))}else s.add(String(ans)+'?')}return shuffle([...s]).slice(0,4)}
 function make(worldId,d=1){
  let a,b,ans,prompt,visual='',wrongAnswer,options,missingPrompt,missingAnswer;
- if(worldId==='g1-number'){ans=r(1,9);prompt=`별이 ${ans}개 있어요. 몇 개인가요?`;visual='⭐'.repeat(ans);options=opts(ans)}
+ if(worldId==='g1-number'){ans=r(1,9);prompt='별을 세어 보세요. 모두 몇 개인가요?';visual='⭐'.repeat(ans);options=opts(ans)}
  else if(worldId==='g1-add'||worldId==='g1-final'){a=r(1,d===1?5:9);b=r(1,10-a);ans=a+b;prompt=`${a} + ${b} = ?`;visual='🔵'.repeat(a)+'  '+'🟡'.repeat(b);options=opts(ans);missingPrompt=`${a} + □ = ${ans}`;missingAnswer=b}
  else if(worldId==='g1-sub'){a=r(5,10);b=r(1,a);ans=a-b;prompt=`${a} - ${b} = ?`;options=opts(ans);missingPrompt=`${a} - □ = ${ans}`;missingAnswer=b}
  else if(worldId==='g1-shape'){const q=pick([{p:'세모의 변은 몇 개인가요?',a:3},{p:'네모의 변은 몇 개인가요?',a:4},{p:'동그라미에는 꼭짓점이 몇 개인가요?',a:0}]);prompt=q.p;ans=q.a;options=opts(ans)}
  else if(worldId==='g1-compare'){a=r(1,20);b=r(1,20);while(a===b)b=r(1,20);ans=a>b?a:b;prompt=`${a}와 ${b} 중 더 큰 수는?`;options=[String(a),String(b),String(a+b),String(Math.abs(a-b))]}
- else if(worldId==='g1-time'){ans=r(1,12);prompt=`시계의 짧은 바늘이 ${ans}을 가리켜요. 몇 시일까요?`;options=opts(ans)}
+ else if(worldId==='g1-time'){ans=r(1,12);const clocks=['🕐','🕑','🕒','🕓','🕔','🕕','🕖','🕗','🕘','🕙','🕚','🕛'];prompt='시계를 보고 몇 시인지 골라보세요.';visual=clocks[ans-1];options=opts(ans)}
  else if(worldId==='g1-big-number'){a=r(1,9);b=r(0,9);ans=a*10+b;prompt=`십의 자리 ${a}, 일의 자리 ${b}인 수는?`;options=opts(ans)}
  else if(worldId==='g2-number'){ans=r(100,999);prompt=`${Math.floor(ans/100)}백 ${Math.floor((ans%100)/10)}십 ${ans%10}인 수는?`;options=opts(ans)}
  else if(worldId==='g2-addsub'){a=r(10,89);b=r(10,99-a);ans=a+b;prompt=`${a} + ${b} = ?`;options=opts(ans);wrongAnswer=ans+10}
