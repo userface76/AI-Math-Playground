@@ -258,10 +258,27 @@ function stopHexaGame(resetView=true){
   if(resetView&&$('hexaBoard'))$('hexaBoard').innerHTML='';
 }
 
-let towerState={running:false,locked:false,tiles:[],tray:[],score:0,combo:0,gameOver:false};
+let towerState={running:false,locked:false,tiles:[],tray:[],score:0,combo:0,gameOver:false,burstTimer:null};
+
+function towerLayout(){
+  const layout=[];
+  [18,50,82].forEach(y=>[7,24,41,58,75,92].forEach(x=>layout.push({x,y,z:0})));
+  [22,50,78].forEach(y=>[24,50,76].forEach(x=>layout.push({x,y,z:1})));
+  [33,50,67].forEach(x=>layout.push({x,y:50,z:2}));
+  return layout;
+}
 function buildTowerTiles(){
   const values=[];for(let n=1;n<=5;n++)for(let i=0;i<6;i++)values.push(n);
-  return miniShuffle(values).map((value,index)=>({id:index,value,active:true}));
+  const shuffled=miniShuffle(values),layout=towerLayout();
+  return layout.map((pos,index)=>({id:index,value:shuffled[index],active:true,...pos,tilt:(index%3-1)*1.6}));
+}
+function towerTileIsFree(tile){
+  if(!tile?.active)return false;
+  return !towerState.tiles.some(other=>{
+    if(!other.active||other.z<=tile.z)return false;
+    const dx=Math.abs(other.x-tile.x),dy=Math.abs(other.y-tile.y);
+    return dx<18&&dy<20;
+  });
 }
 function setTowerCoach(kind='idle',message='같은 숫자 3개를 아래 칸에 모아봐!'){
   const img=$('towerCoachImage'),status=$('towerStatus');
@@ -272,23 +289,27 @@ function updateTowerHud(){
   if($('towerScore'))$('towerScore').textContent=towerState.score+'점';
   if($('towerCombo'))$('towerCombo').textContent='콤보 '+towerState.combo;
   if($('towerTrayCount'))$('towerTrayCount').textContent=Math.min(towerState.tray.length,7)+'/7';
+  const remain=towerState.tiles.filter(t=>t.active).length;
+  if($('towerRemaining'))$('towerRemaining').textContent=remain+'개 남음';
 }
 function renderTowerBoard(){
   const board=$('towerBoard');if(!board)return;
-  const rows=[3,6,6,6,9];let cursor=0;board.innerHTML='';
-  rows.forEach((len,rowIndex)=>{
-    const row=document.createElement('div');row.className='tower-row tower-row-'+rowIndex;
-    for(let j=0;j<len;j++){
-      const tile=towerState.tiles[cursor++];
-      const b=document.createElement('button');b.type='button';b.className='tower-tile num-'+tile.value;b.textContent=tile.value;
-      b.setAttribute('aria-label',tile.value+' 숫자 타일');
-      if(!tile.active){b.classList.add('tower-removed');b.disabled=true}
-      else b.addEventListener('click',()=>pickTowerTile(tile.id));
-      row.appendChild(b);
-    }
-    board.appendChild(row);
+  board.innerHTML='';
+  [...towerState.tiles].sort((p,q)=>p.z-q.z||p.y-q.y||p.x-q.x).forEach(tile=>{
+    if(!tile.active)return;
+    const free=towerState.running&&!towerState.locked&&towerTileIsFree(tile);
+    const b=document.createElement('button');
+    b.type='button';
+    b.className='tower-tile num-'+tile.value+' layer-'+tile.z+(free?' tower-free':' tower-covered');
+    b.style.setProperty('--x',tile.x+'%');b.style.setProperty('--y',tile.y+'%');b.style.setProperty('--z',tile.z);b.style.setProperty('--tilt',tile.tilt+'deg');
+    b.innerHTML='<span>'+tile.value+'</span><small>● ● ●</small>';
+    b.setAttribute('aria-label',tile.value+' 숫자 타일'+(free?' 선택 가능':' 가려져 있음'));
+    b.disabled=!free;
+    if(free)b.addEventListener('click',()=>pickTowerTile(tile.id));
+    board.appendChild(b);
   });
   board.classList.toggle('locked',towerState.locked||!towerState.running);
+  updateTowerHud();
 }
 function renderTowerTray(){
   const tray=$('towerTray');if(!tray)return;tray.innerHTML='';
@@ -303,49 +324,63 @@ function renderTowerTray(){
 }
 function pickTowerTile(id){
   if(!towerState.running||towerState.locked||towerState.gameOver)return;
-  const tile=towerState.tiles.find(t=>t.id===id);if(!tile||!tile.active)return;
+  const tile=towerState.tiles.find(t=>t.id===id);
+  if(!tile||!towerTileIsFree(tile))return;
   tile.active=false;towerState.tray.push(tile.value);renderTowerBoard();renderTowerTray();
+  if(towerState.tray.length>=8){endTowerGame(false);return}
   const same=towerState.tray.filter(v=>v===tile.value).length;
   if(same>=3){
     towerState.locked=true;renderTowerBoard();setTowerCoach('correct',tile.value+' 세 개! 펑! 🎉');
-    setTimeout(()=>burstTowerTriple(tile.value),360);return;
+    clearTimeout(towerState.burstTimer);
+    towerState.burstTimer=setTimeout(()=>burstTowerTriple(tile.value),420);
+    return;
   }
   towerState.combo=0;updateTowerHud();
-  if(towerState.tray.length>=8){endTowerGame(false);return}
-  setTowerCoach('idle','같은 숫자 3개를 모아봐! 보관칸은 7개까지야.');
+  const freeCount=towerState.tiles.filter(t=>towerTileIsFree(t)).length;
+  setTowerCoach('idle','위에 가리지 않은 타일만 고를 수 있어! 선택 가능 '+freeCount+'개');
 }
 function burstTowerTriple(value){
+  if(!towerState.running)return;
   let removed=0;
   towerState.tray=towerState.tray.filter(v=>{if(v===value&&removed<3){removed++;return false}return true});
-  towerState.score+=30+towerState.combo*10;towerState.combo++;towerState.locked=false;
+  towerState.score+=30+towerState.combo*10;towerState.combo++;towerState.locked=false;towerState.burstTimer=null;
   renderTowerTray();renderTowerBoard();
   if(towerState.tiles.every(t=>!t.active)&&towerState.tray.length===0){endTowerGame(true);return}
-  setTowerCoach('correct',towerState.combo>1?towerState.combo+'콤보! 계속 묶어보자!':'좋아! 같은 숫자를 또 찾아보자!');
+  const freeCount=towerState.tiles.filter(t=>towerTileIsFree(t)).length;
+  setTowerCoach('correct',towerState.combo>1?towerState.combo+'콤보! 아래 타일이 열렸어!':'펑! 아래에 있던 숫자가 열렸어. 선택 가능 '+freeCount+'개');
 }
 function startTowerGame(){
-  towerState={running:true,locked:false,tiles:buildTowerTiles(),tray:[],score:0,combo:0,gameOver:false};
-  $('towerOverflow')?.classList.add('hidden');$('towerStartBtn')?.classList.add('hidden');renderTowerBoard();renderTowerTray();setTowerCoach('idle','숫자 타워 시작! 같은 숫자 3개를 모아 펑!');
+  clearTimeout(towerState.burstTimer);
+  towerState={running:true,locked:false,tiles:buildTowerTiles(),tray:[],score:0,combo:0,gameOver:false,burstTimer:null};
+  $('towerOverflow')?.classList.add('hidden');$('towerStartBtn')?.classList.add('hidden');
+  if($('towerQuitBtn'))$('towerQuitBtn').textContent='그만하기';
+  renderTowerBoard();renderTowerTray();setTowerCoach('idle','마작처럼 위에 드러난 숫자부터 골라서 같은 숫자 3개를 모아봐!');
 }
 function endTowerGame(won){
-  towerState.running=false;towerState.gameOver=true;towerState.locked=true;renderTowerBoard();renderTowerTray();
+  towerState.running=false;towerState.gameOver=true;towerState.locked=true;clearTimeout(towerState.burstTimer);towerState.burstTimer=null;
+  renderTowerBoard();renderTowerTray();
   if(won){
     state.stars+=6;state.xp+=30;while(state.xp>=100){state.xp-=100;state.level++}
-    setTowerCoach('correct','타워 클리어! 모든 숫자를 없앴어! ⭐ +6');updateHud();
+    setTowerCoach('correct','숫자 타워 클리어! 모든 층을 없앴어! ⭐ +6');updateHud();
     $('towerStartBtn').textContent='다시 하기';
   }else{
-    setTowerCoach('surprise','8번째 숫자가 쌓였어! OUT! 다시 조합해보자.');
+    setTowerCoach('surprise','보관칸이 8개가 됐어! OUT! 위쪽 숫자 조합부터 다시 노려보자.');
     $('towerStartBtn').textContent='다시 도전';
   }
+  if($('towerQuitBtn'))$('towerQuitBtn').textContent='놀이로 돌아가기';
   $('towerStartBtn')?.classList.remove('hidden');
 }
 function openTowerGame(){
   hideMainScreens();$('playPanel')?.classList.remove('hidden');$('playMenu')?.classList.add('hidden');$('numberCatch')?.classList.add('hidden');$('numberHexa')?.classList.add('hidden');$('numberTower')?.classList.remove('hidden');
-  towerState={running:false,locked:false,tiles:buildTowerTiles(),tray:[],score:0,combo:0,gameOver:false};
-  renderTowerBoard();renderTowerTray();setTowerCoach('idle','같은 숫자 3개를 모으면 자동으로 펑! 8개가 되면 OUT!');
+  clearTimeout(towerState.burstTimer);
+  towerState={running:false,locked:false,tiles:buildTowerTiles(),tray:[],score:0,combo:0,gameOver:false,burstTimer:null};
+  renderTowerBoard();renderTowerTray();setTowerCoach('idle','숫자 블록이 층층이 쌓여 있어. 위에 드러난 타일부터 선택할 수 있어!');
   $('towerStartBtn').textContent='게임 시작';$('towerStartBtn')?.classList.remove('hidden');
+  if($('towerQuitBtn'))$('towerQuitBtn').textContent='그만하기';
 }
 function stopTowerGame(resetView=true){
-  if(towerState){towerState.running=false;towerState.locked=false}
+  clearTimeout(towerState?.burstTimer);
+  if(towerState){towerState.running=false;towerState.locked=false;towerState.burstTimer=null}
   if(resetView){if($('towerBoard'))$('towerBoard').innerHTML='';if($('towerTray'))$('towerTray').innerHTML=''}
 }
 
@@ -392,6 +427,7 @@ $('hexaBackBtn')?.addEventListener('click',showPlay);
 $('hexaQuitBtn')?.addEventListener('click',()=>{stopHexaGame(false);showPlay()});
 $('towerStartBtn')?.addEventListener('click',startTowerGame);
 $('towerBackBtn')?.addEventListener('click',showPlay);
+$('towerQuitBtn')?.addEventListener('click',()=>{stopTowerGame(false);showPlay()});
 $('catchStartBtn')?.addEventListener('click',startNumberCatch);
 $('catchQuitBtn')?.addEventListener('click',showPlay);
 $('catchBackBtn')?.addEventListener('click',showPlay);

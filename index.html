@@ -105,7 +105,7 @@
   <div id="numberTower" class="number-tower hidden">
     <div class="mini-game-top">
       <button id="towerBackBtn" class="back-btn">‹ 놀이</button>
-      <div class="tower-stats"><b id="towerScore">0점</b><strong id="towerCombo">콤보 0</strong></div>
+      <div class="tower-stats"><b id="towerScore">0점</b><strong id="towerCombo">콤보 0</strong><em id="towerRemaining">30개 남음</em></div>
     </div>
     <div class="mini-coach">
       <img id="towerCoachImage" src="public/assets/suki/suki_minigame_idle.webp" alt="수키"/>
@@ -117,7 +117,10 @@
       <div id="towerTray" class="tower-tray" aria-label="선택한 숫자 보관칸"></div>
       <div id="towerOverflow" class="tower-overflow hidden">8번째 숫자! OUT</div>
     </div>
-    <button id="towerStartBtn" class="primary">게임 시작</button>
+    <div class="tower-actions">
+      <button id="towerStartBtn" class="primary">게임 시작</button>
+      <button id="towerQuitBtn" class="quit-btn">그만하기</button>
+    </div>
   </div>
 </section><section id="leaguePanel" class="screen league-screen hidden">
   <div class="league-hero">
