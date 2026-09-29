@@ -39,15 +39,26 @@
 <section id="game" class="screen game-stage hidden"><div class="game-nav"><button id="mapBtn" class="back-btn">‹ 지도</button><div class="mission-mini"><span>⭐ <span id="missionStars">0</span>/20</span><div class="mission-track"><div id="missionBar"></div></div></div></div><div id="avatarLayer" class="avatar-layer" aria-live="polite"><div class="avatar-shadow"></div><div id="mascot" class="floating-avatar" aria-label="수키"><img id="sukiImage" alt="수키 AI 친구" hidden/><div id="sukiFallback" class="suki-fallback">✨<span>☁️</span>✨</div></div></div><div class="game-panel"><p id="mode" class="mode">수키랑 놀기</p><h1 id="speech">준비됐어?</h1><div id="visual" class="visual"></div><div id="question" class="question"></div><div id="answers" class="answers"></div><div class="game-actions"><button id="startBtn" class="primary">게임 시작!</button><button id="quitBtn" class="quit-btn hidden">그만하기</button></div><button id="hintBtn" class="secondary hidden">💡 수키 힌트</button><button id="treasureBtn" class="treasure hidden">🎁 보물상자 열기</button></div></section>
 <section id="playPanel" class="screen play-screen hidden">
   <div class="play-head">
-    <div><p class="eyebrow">QUICK PLAY</p><h1>🎮 수학 놀이</h1><p>짧고 빠르게 놀면서 계산 감각을 키워요.</p></div>
+    <div><p class="eyebrow">QUICK PLAY</p><h1>🎮 수학 놀이</h1><p>짧게 놀면서 숫자 감각·집중력·계산 감각을 키워요.</p></div>
   </div>
   <div id="playMenu" class="play-menu">
     <button id="numberCatchCard" class="play-game-card">
       <div class="play-game-icon">🔢</div>
-      <div><b>수키 넘버캐치</b><span>떨어지는 숫자 중 정답을 잡아라!</span><small>❤️ 5개 · 점점 빨라지는 난이도</small></div>
+      <div><b>수키 넘버캐치</b><span>떨어지는 숫자 중 정답을 잡아라!</span><small>❤️ 5개 · 속도 선택 · 단계별 도전</small></div>
+      <i>›</i>
+    </button>
+    <button id="numberHexaCard" class="play-game-card hexa-card">
+      <div class="play-game-icon">⬡</div>
+      <div><b>수키 넘버헥사</b><span>육각 숫자를 1부터 차례대로 터치!</span><small>⏱️ 총 10라운드 · 점점 커지는 숫자판</small></div>
+      <i>›</i>
+    </button>
+    <button id="numberTowerCard" class="play-game-card tower-card">
+      <div class="play-game-icon">🧱</div>
+      <div><b>수키 숫자타워</b><span>같은 숫자 3개를 모아 펑!</span><small>7칸까지 안전 · 8번째 숫자가 쌓이면 OUT</small></div>
       <i>›</i>
     </button>
   </div>
+
   <div id="numberCatch" class="number-catch hidden">
     <div class="catch-top">
       <button id="catchBackBtn" class="back-btn">‹ 놀이</button>
@@ -71,6 +82,39 @@
     </div>
     <button id="catchStartBtn" class="primary">게임 시작</button>
     <button id="catchQuitBtn" class="quit-btn hidden">그만하기</button>
+  </div>
+
+  <div id="numberHexa" class="number-hexa hidden">
+    <div class="mini-game-top">
+      <button id="hexaBackBtn" class="back-btn">‹ 놀이</button>
+      <div class="hexa-stats"><b id="hexaRound">ROUND 1/10</b><strong id="hexaTimer">40초</strong></div>
+    </div>
+    <div class="mini-coach">
+      <img id="hexaCoachImage" src="public/assets/suki/suki_minigame_idle.webp" alt="수키"/>
+      <div id="hexaStatus" aria-live="polite">1부터 차례대로 눌러보자!</div>
+    </div>
+    <div class="hexa-progress"><div id="hexaProgressBar"></div></div>
+    <div class="hexa-target">다음 숫자 <strong id="hexaNext">1</strong></div>
+    <div id="hexaBoard" class="hexa-board" aria-label="숫자 육각 타일"></div>
+    <button id="hexaStartBtn" class="primary">1라운드 시작</button>
+  </div>
+
+  <div id="numberTower" class="number-tower hidden">
+    <div class="mini-game-top">
+      <button id="towerBackBtn" class="back-btn">‹ 놀이</button>
+      <div class="tower-stats"><b id="towerScore">0점</b><strong id="towerCombo">콤보 0</strong></div>
+    </div>
+    <div class="mini-coach">
+      <img id="towerCoachImage" src="public/assets/suki/suki_minigame_idle.webp" alt="수키"/>
+      <div id="towerStatus" aria-live="polite">같은 숫자 3개를 아래 칸에 모아봐!</div>
+    </div>
+    <div id="towerBoard" class="tower-board" aria-label="숫자 타워"></div>
+    <div class="tower-tray-wrap">
+      <div class="tower-tray-label"><span>보관칸</span><b id="towerTrayCount">0/7</b></div>
+      <div id="towerTray" class="tower-tray" aria-label="선택한 숫자 보관칸"></div>
+      <div id="towerOverflow" class="tower-overflow hidden">8번째 숫자! OUT</div>
+    </div>
+    <button id="towerStartBtn" class="primary">게임 시작</button>
   </div>
 </section><section id="leaguePanel" class="screen league-screen hidden">
   <div class="league-hero">

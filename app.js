@@ -32,7 +32,7 @@ function isWorldUnlocked(w){if(w.order===1)return true;const prev=gradeWorlds().
 function stageConcept(w,i){if(w.id==='g1-number'){return ['count-9','read-write-9','order-9','read-write-9','grade1-number-review'][i]||'count-9'}return w.concepts[Math.min(i,w.concepts.length-1)]||w.concepts[0]}function renderWorld(){const w=world();$('worldNumber').textContent=`WORLD ${w.order}`;$('worldTitle').textContent=`${w.icon} ${w.name}`;$('worldCopy').textContent='수키가 네 플레이를 보면서 딱 맞는 난이도를 찾아줄게!';$('worldTabs').innerHTML='';gradeWorlds().forEach(x=>{const b=document.createElement('button');b.className='world-tab'+(x.id===w.id?' active':'');b.textContent=isWorldUnlocked(x)?`${x.icon}${x.order}`:`🔒${x.order}`;b.disabled=!isWorldUnlocked(x);b.onclick=()=>{state.currentWorld=x.id;renderWorld();save()};$('worldTabs').appendChild(b)});$('stageMap').innerHTML='';w.stages.forEach((name,i)=>{const b=document.createElement('button'),mode=content.modes[i%Math.max(1,content.modes.length)]?.id||fallbackModes[i%4],d=window.AdaptiveEngine?.difficulty(state.adaptive,`${w.id}:${mode}`)||1;b.className='stage unlocked';b.innerHTML=`<b>${i+1}</b><span>${name}</span><small>${i===w.stages.length-1?'월드 최종미션':`숙련도 ${state.mastery[`${w.id}:${mode}`]??50}% · 난이도 ${d}`}</small>`;const concept=stageConcept(w,i);b.onclick=()=>openGame(mode,concept,i);$('stageMap').appendChild(b)})}
 function problem(){if(state.gameType==='daily-mission')return missionProblem();return window.ProblemEngine?.make(world().id,difficulty(),state.currentConcept)||{prompt:'1 + 1 = ?',answer:'2',options:['1','2','3','4'],difficulty:1}}
 function choices(ans){const s=new Set([ans]);while(s.size<4)s.add(Math.max(0,Math.min(30,ans-3+Math.floor(Math.random()*7))));return[...s].sort(()=>Math.random()-.5)}function buttons(items,fn){$('answers').innerHTML='';items.forEach(v=>{const b=document.createElement('button');b.className='answer';b.textContent=v;b.onclick=()=>fn(v);$('answers').appendChild(b)})}function modeName(id){return content.modes.find(x=>x.id===id)?.name||id}
-function hideMainScreens(){stopNumberCatch(false);['home','world','game','playPanel','leaguePanel','parentPanel'].forEach(id=>$(id)?.classList.add('hidden'))}
+function hideMainScreens(){stopNumberCatch(false);stopHexaGame(false);stopTowerGame(false);['home','world','game','playPanel','leaguePanel','parentPanel'].forEach(id=>$(id)?.classList.add('hidden'))}
 const leagueNameA=['별','달','구름','숫자','수학','반짝','초코','젤리','토리','루미','모모'];
 const leagueNameB=['콩','별','냥','봇','링','팡','꿈','곰','핀'];
 const leagueAvatars=['🌟','🌙','🐱','🧁','🐻','🚀','🦊','🐧','🍬','💫','🦄','🐳','🌈','🎈','🧩'];
@@ -79,7 +79,7 @@ function ensureCatchRobot(){
   }
 }
 
-function showPlay(){hideMainScreens();$('playPanel')?.classList.remove('hidden');$('playMenu')?.classList.remove('hidden');$('numberCatch')?.classList.add('hidden');document.querySelectorAll('.nav-item').forEach(x=>x.classList.toggle('active',x.dataset.nav==='play'))}
+function showPlay(){hideMainScreens();$('playPanel')?.classList.remove('hidden');$('playMenu')?.classList.remove('hidden');$('numberCatch')?.classList.add('hidden');$('numberHexa')?.classList.add('hidden');$('numberTower')?.classList.add('hidden');document.querySelectorAll('.nav-item').forEach(x=>x.classList.toggle('active',x.dataset.nav==='play'))}
 function catchQuestion(){
  const grade=activeGrade();let a,b,op='+',answer;
  if(grade<=1){a=1+Math.floor(Math.random()*9);b=1+Math.floor(Math.random()*Math.max(1,10-a));answer=a+b}
@@ -137,6 +137,200 @@ function startNumberCatch(){catchState={running:true,lives:5,score:0,combo:0,lev
 function endNumberCatch(){catchState.running=false;clearTimeout(catchState.timer);ensureCatchRobot();$('catchArena')?.querySelectorAll('.fall-number').forEach(x=>x.remove());const end=document.createElement('div');end.className='catch-end-card';end.innerHTML='<b>게임 종료!</b><span>점수 '+catchState.score+'점</span>';$('catchArena')?.appendChild(end);catchRobotReact('complete',catchState.score>=100?'대단해! 기록이 정말 좋아!':'잘했어! 다음엔 더 높이 가보자!');$('catchStartBtn').textContent='다시 하기';$('catchStartBtn').classList.remove('hidden');$('catchQuitBtn').classList.remove('hidden');state.stars+=Math.floor(catchState.score/50);state.xp+=Math.min(40,Math.floor(catchState.score/10));while(state.xp>=100){state.xp-=100;state.level++}updateHud()}
 function stopNumberCatch(resetView=true){if(catchState?.timer)clearTimeout(catchState.timer);if(catchState)catchState.running=false;if(resetView&&$('catchArena'))$('catchArena').innerHTML=''}
 function openNumberCatch(){hideMainScreens();$('playPanel')?.classList.remove('hidden');$('playMenu')?.classList.add('hidden');$('numberCatch')?.classList.remove('hidden');$('catchArena').innerHTML='';ensureCatchRobot();catchRobotReact('idle','정답 숫자를 잡아봐!');$('catchStartBtn').textContent='게임 시작';$('catchStartBtn').classList.remove('hidden');$('catchQuitBtn').classList.add('hidden');catchState={running:false,lives:5,score:0,combo:0,level:1,correctCount:0,pace:'slow',answer:0,timer:null,spawnTimer:null};catchQuestion();updateCatchHud()}
+
+const hexaRoundPlan=[
+  {count:10,time:40},{count:10,time:35},{count:12,time:35},{count:15,time:35},{count:15,time:32},
+  {count:20,time:30},{count:20,time:28},{count:20,time:26},{count:20,time:24},{count:20,time:22}
+];
+let hexaState={round:1,running:false,next:1,timeLeft:40000,endAt:0,timer:null,mistakes:0,totalMs:0,roundCleared:false,finished:false};
+
+function miniShuffle(items){
+  const a=[...items];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}
+  return a;
+}
+function hexaConfig(){return hexaRoundPlan[Math.max(0,Math.min(hexaRoundPlan.length-1,hexaState.round-1))]}
+function setHexaCoach(kind='idle',message='1부터 차례대로 눌러보자!'){
+  const img=$('hexaCoachImage'),status=$('hexaStatus');
+  if(img)img.src=SUKI_BASE+(kind==='correct'?'suki_minigame_correct.webp':kind==='surprise'?'suki_07_surprise.png':'suki_minigame_idle.webp');
+  if(status)status.textContent=message;
+}
+function updateHexaHud(){
+  const cfg=hexaConfig();
+  if($('hexaRound'))$('hexaRound').textContent='ROUND '+hexaState.round+'/10';
+  if($('hexaTimer'))$('hexaTimer').textContent=Math.max(0,Math.ceil(hexaState.timeLeft/1000))+'초';
+  if($('hexaNext'))$('hexaNext').textContent=hexaState.next<=cfg.count?hexaState.next:'✓';
+  const within=Math.min(1,Math.max(0,(hexaState.next-1)/cfg.count));
+  if($('hexaProgressBar'))$('hexaProgressBar').style.width=(((hexaState.round-1)+within)/10*100)+'%';
+}
+function renderHexaBoard(){
+  const board=$('hexaBoard');if(!board)return;
+  const cfg=hexaConfig(),values=miniShuffle(Array.from({length:cfg.count},(_,i)=>i+1));
+  board.innerHTML='';
+  board.dataset.count=String(cfg.count);
+  values.forEach(v=>{
+    const b=document.createElement('button');
+    b.type='button';b.className='hex-number';b.textContent=v;b.setAttribute('aria-label',v+'번');
+    b.addEventListener('click',()=>checkHexaNumber(v,b));
+    board.appendChild(b);
+  });
+}
+function prepareHexaRound(){
+  clearInterval(hexaState.timer);hexaState.timer=null;hexaState.running=false;hexaState.next=1;hexaState.roundCleared=false;
+  const cfg=hexaConfig();hexaState.timeLeft=cfg.time*1000;
+  renderHexaBoard();updateHexaHud();setHexaCoach('idle',hexaState.round+'라운드! 1부터 '+cfg.count+'까지 차례대로 눌러보자!');
+  if($('hexaStartBtn')){$('hexaStartBtn').textContent=hexaState.round+'라운드 시작';$('hexaStartBtn').classList.remove('hidden')}
+}
+function startHexaRound(){
+  if(hexaState.running)return;
+  hexaState.running=true;hexaState.endAt=Date.now()+hexaState.timeLeft;
+  $('hexaStartBtn')?.classList.add('hidden');setHexaCoach('idle','시작! '+hexaState.next+'을 찾아봐!');
+  hexaState.timer=setInterval(()=>{
+    hexaState.timeLeft=Math.max(0,hexaState.endAt-Date.now());updateHexaHud();
+    if(hexaState.timeLeft<=0)finishHexaRound(false);
+  },100);
+}
+function checkHexaNumber(value,btn){
+  if(!hexaState.running)return;
+  const cfg=hexaConfig();
+  if(value===hexaState.next){
+    btn.disabled=true;btn.classList.add('hex-done');hexaState.next++;updateHexaHud();
+    if(hexaState.next>cfg.count){finishHexaRound(true);return}
+    setHexaCoach('idle','좋아! 다음은 '+hexaState.next+'!');
+  }else{
+    hexaState.mistakes++;btn.classList.remove('hex-wrong');void btn.offsetWidth;btn.classList.add('hex-wrong');
+    setHexaCoach('surprise',hexaState.next+'을 먼저 찾아보자!');
+  }
+}
+function finishHexaRound(success){
+  if(!hexaState.running)return;
+  hexaState.running=false;clearInterval(hexaState.timer);hexaState.timer=null;
+  const cfg=hexaConfig();
+  if(success){
+    hexaState.totalMs+=Math.max(0,cfg.time*1000-hexaState.timeLeft);hexaState.roundCleared=true;
+    if(hexaState.round>=10){
+      hexaState.finished=true;state.stars+=12;state.xp+=60;while(state.xp>=100){state.xp-=100;state.level++}
+      setHexaCoach('correct','10라운드 완주! 정말 빠르고 정확했어! ⭐ +12');
+      $('hexaStartBtn').textContent='처음부터 다시';$('hexaStartBtn').classList.remove('hidden');updateHud();
+    }else{
+      setHexaCoach('correct',hexaState.round+'라운드 성공! 다음 라운드로 가자!');
+      $('hexaStartBtn').textContent='다음 라운드';$('hexaStartBtn').classList.remove('hidden');
+    }
+  }else{
+    setHexaCoach('surprise','시간이 끝났어! 같은 라운드를 천천히 다시 해보자.');
+    $('hexaStartBtn').textContent='다시 도전';$('hexaStartBtn').classList.remove('hidden');
+  }
+}
+function handleHexaStart(){
+  if(hexaState.finished){
+    hexaState={round:1,running:false,next:1,timeLeft:40000,endAt:0,timer:null,mistakes:0,totalMs:0,roundCleared:false,finished:false};
+    prepareHexaRound();startHexaRound();return;
+  }
+  if(hexaState.roundCleared){hexaState.round++;prepareHexaRound();startHexaRound();return}
+  if(!hexaState.running&&hexaState.timeLeft<=0)prepareHexaRound();
+  startHexaRound();
+}
+function openHexaGame(){
+  hideMainScreens();$('playPanel')?.classList.remove('hidden');$('playMenu')?.classList.add('hidden');$('numberCatch')?.classList.add('hidden');$('numberTower')?.classList.add('hidden');$('numberHexa')?.classList.remove('hidden');
+  hexaState={round:1,running:false,next:1,timeLeft:40000,endAt:0,timer:null,mistakes:0,totalMs:0,roundCleared:false,finished:false};prepareHexaRound();
+}
+function stopHexaGame(resetView=true){
+  if(hexaState?.timer)clearInterval(hexaState.timer);
+  if(hexaState){hexaState.timer=null;hexaState.running=false}
+  if(resetView&&$('hexaBoard'))$('hexaBoard').innerHTML='';
+}
+
+let towerState={running:false,locked:false,tiles:[],tray:[],score:0,combo:0,gameOver:false};
+function buildTowerTiles(){
+  const values=[];for(let n=1;n<=5;n++)for(let i=0;i<6;i++)values.push(n);
+  return miniShuffle(values).map((value,index)=>({id:index,value,active:true}));
+}
+function setTowerCoach(kind='idle',message='같은 숫자 3개를 아래 칸에 모아봐!'){
+  const img=$('towerCoachImage'),status=$('towerStatus');
+  if(img)img.src=SUKI_BASE+(kind==='correct'?'suki_minigame_correct.webp':kind==='surprise'?'suki_07_surprise.png':'suki_minigame_idle.webp');
+  if(status)status.textContent=message;
+}
+function updateTowerHud(){
+  if($('towerScore'))$('towerScore').textContent=towerState.score+'점';
+  if($('towerCombo'))$('towerCombo').textContent='콤보 '+towerState.combo;
+  if($('towerTrayCount'))$('towerTrayCount').textContent=Math.min(towerState.tray.length,7)+'/7';
+}
+function renderTowerBoard(){
+  const board=$('towerBoard');if(!board)return;
+  const rows=[3,6,6,6,9];let cursor=0;board.innerHTML='';
+  rows.forEach((len,rowIndex)=>{
+    const row=document.createElement('div');row.className='tower-row tower-row-'+rowIndex;
+    for(let j=0;j<len;j++){
+      const tile=towerState.tiles[cursor++];
+      const b=document.createElement('button');b.type='button';b.className='tower-tile num-'+tile.value;b.textContent=tile.value;
+      b.setAttribute('aria-label',tile.value+' 숫자 타일');
+      if(!tile.active){b.classList.add('tower-removed');b.disabled=true}
+      else b.addEventListener('click',()=>pickTowerTile(tile.id));
+      row.appendChild(b);
+    }
+    board.appendChild(row);
+  });
+  board.classList.toggle('locked',towerState.locked||!towerState.running);
+}
+function renderTowerTray(){
+  const tray=$('towerTray');if(!tray)return;tray.innerHTML='';
+  for(let i=0;i<7;i++){
+    const slot=document.createElement('div');slot.className='tower-slot';
+    if(i<towerState.tray.length){const v=towerState.tray[i];slot.textContent=v;slot.classList.add('filled','num-'+v)}
+    else slot.textContent='·';
+    tray.appendChild(slot);
+  }
+  $('towerOverflow')?.classList.toggle('hidden',towerState.tray.length<8);
+  updateTowerHud();
+}
+function pickTowerTile(id){
+  if(!towerState.running||towerState.locked||towerState.gameOver)return;
+  const tile=towerState.tiles.find(t=>t.id===id);if(!tile||!tile.active)return;
+  tile.active=false;towerState.tray.push(tile.value);renderTowerBoard();renderTowerTray();
+  const same=towerState.tray.filter(v=>v===tile.value).length;
+  if(same>=3){
+    towerState.locked=true;renderTowerBoard();setTowerCoach('correct',tile.value+' 세 개! 펑! 🎉');
+    setTimeout(()=>burstTowerTriple(tile.value),360);return;
+  }
+  towerState.combo=0;updateTowerHud();
+  if(towerState.tray.length>=8){endTowerGame(false);return}
+  setTowerCoach('idle','같은 숫자 3개를 모아봐! 보관칸은 7개까지야.');
+}
+function burstTowerTriple(value){
+  let removed=0;
+  towerState.tray=towerState.tray.filter(v=>{if(v===value&&removed<3){removed++;return false}return true});
+  towerState.score+=30+towerState.combo*10;towerState.combo++;towerState.locked=false;
+  renderTowerTray();renderTowerBoard();
+  if(towerState.tiles.every(t=>!t.active)&&towerState.tray.length===0){endTowerGame(true);return}
+  setTowerCoach('correct',towerState.combo>1?towerState.combo+'콤보! 계속 묶어보자!':'좋아! 같은 숫자를 또 찾아보자!');
+}
+function startTowerGame(){
+  towerState={running:true,locked:false,tiles:buildTowerTiles(),tray:[],score:0,combo:0,gameOver:false};
+  $('towerOverflow')?.classList.add('hidden');$('towerStartBtn')?.classList.add('hidden');renderTowerBoard();renderTowerTray();setTowerCoach('idle','숫자 타워 시작! 같은 숫자 3개를 모아 펑!');
+}
+function endTowerGame(won){
+  towerState.running=false;towerState.gameOver=true;towerState.locked=true;renderTowerBoard();renderTowerTray();
+  if(won){
+    state.stars+=6;state.xp+=30;while(state.xp>=100){state.xp-=100;state.level++}
+    setTowerCoach('correct','타워 클리어! 모든 숫자를 없앴어! ⭐ +6');updateHud();
+    $('towerStartBtn').textContent='다시 하기';
+  }else{
+    setTowerCoach('surprise','8번째 숫자가 쌓였어! OUT! 다시 조합해보자.');
+    $('towerStartBtn').textContent='다시 도전';
+  }
+  $('towerStartBtn')?.classList.remove('hidden');
+}
+function openTowerGame(){
+  hideMainScreens();$('playPanel')?.classList.remove('hidden');$('playMenu')?.classList.add('hidden');$('numberCatch')?.classList.add('hidden');$('numberHexa')?.classList.add('hidden');$('numberTower')?.classList.remove('hidden');
+  towerState={running:false,locked:false,tiles:buildTowerTiles(),tray:[],score:0,combo:0,gameOver:false};
+  renderTowerBoard();renderTowerTray();setTowerCoach('idle','같은 숫자 3개를 모으면 자동으로 펑! 8개가 되면 OUT!');
+  $('towerStartBtn').textContent='게임 시작';$('towerStartBtn')?.classList.remove('hidden');
+}
+function stopTowerGame(resetView=true){
+  if(towerState){towerState.running=false;towerState.locked=false}
+  if(resetView){if($('towerBoard'))$('towerBoard').innerHTML='';if($('towerTray'))$('towerTray').innerHTML=''}
+}
+
 function showLeague(){hideMainScreens();$('leaguePanel').classList.remove('hidden');document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.nav==='league')});renderLeague(document.querySelector('.league-tab.active')?.dataset.leagueTab||'rank')}
 function gradeTitle(g){return g+'학년'}
 function updateGradePickers(){document.querySelectorAll('.grade-picker button').forEach(function(btn){btn.classList.toggle('active',Number(btn.dataset.grade)===activeGrade())});const hint=$('gradePickerHint');if(hint)hint.textContent=activeGrade()+'학년 수학으로 보고 있어요'}
@@ -173,6 +367,12 @@ document.querySelectorAll('.league-tab').forEach(function(btn){btn.addEventListe
 document.querySelectorAll('.grade-picker button').forEach(function(btn){btn.addEventListener('click',function(){selectGrade(btn.dataset.grade)})});
 
 $('numberCatchCard')?.addEventListener('click',openNumberCatch);
+$('numberHexaCard')?.addEventListener('click',openHexaGame);
+$('numberTowerCard')?.addEventListener('click',openTowerGame);
+$('hexaStartBtn')?.addEventListener('click',handleHexaStart);
+$('hexaBackBtn')?.addEventListener('click',showPlay);
+$('towerStartBtn')?.addEventListener('click',startTowerGame);
+$('towerBackBtn')?.addEventListener('click',showPlay);
 $('catchStartBtn')?.addEventListener('click',startNumberCatch);
 $('catchQuitBtn')?.addEventListener('click',showPlay);
 $('catchBackBtn')?.addEventListener('click',showPlay);
