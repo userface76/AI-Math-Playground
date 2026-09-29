@@ -140,7 +140,7 @@ function openNumberCatch(){hideMainScreens();$('playPanel')?.classList.remove('h
 
 const hexaRoundPlan=[
   {count:10,time:40},{count:10,time:35},{count:12,time:35},{count:15,time:35},{count:15,time:32},
-  {count:20,time:30},{count:20,time:28},{count:20,time:26},{count:20,time:24},{count:25,time:24}
+  {count:20,time:30},{count:20,time:28},{count:20,time:26},{count:20,time:24},{count:20,time:22}
 ];
 let hexaState={round:1,running:false,next:1,timeLeft:40000,endAt:0,timer:null,mistakes:0,totalMs:0,roundCleared:false,finished:false};
 
