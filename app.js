@@ -163,16 +163,31 @@ function updateHexaHud(){
   const within=Math.min(1,Math.max(0,(hexaState.next-1)/cfg.count));
   if($('hexaProgressBar'))$('hexaProgressBar').style.width=(((hexaState.round-1)+within)/10*100)+'%';
 }
+function hexaRowsForCount(count){
+  if(count<=10)return [3,4,3];
+  if(count<=12)return [3,4,3,2];
+  if(count<=15)return [3,4,5,3];
+  return [4,5,6,5];
+}
 function renderHexaBoard(){
   const board=$('hexaBoard');if(!board)return;
   const cfg=hexaConfig(),values=miniShuffle(Array.from({length:cfg.count},(_,i)=>i+1));
+  const rows=hexaRowsForCount(cfg.count);
   board.innerHTML='';
   board.dataset.count=String(cfg.count);
-  values.forEach(v=>{
-    const b=document.createElement('button');
-    b.type='button';b.className='hex-number';b.textContent=v;b.setAttribute('aria-label',v+'번');
-    b.addEventListener('click',()=>checkHexaNumber(v,b));
-    board.appendChild(b);
+  board.classList.toggle('hexa-dense',cfg.count>=20);
+  let cursor=0;
+  rows.forEach((rowCount,rowIndex)=>{
+    const row=document.createElement('div');
+    row.className='hexa-row'+(rowIndex%2?' hexa-row-offset':'');
+    for(let i=0;i<rowCount&&cursor<values.length;i++){
+      const v=values[cursor++];
+      const b=document.createElement('button');
+      b.type='button';b.className='hex-number';b.textContent=v;b.setAttribute('aria-label',v+'번');
+      b.addEventListener('click',()=>checkHexaNumber(v,b));
+      row.appendChild(b);
+    }
+    board.appendChild(row);
   });
 }
 function prepareHexaRound(){
@@ -180,6 +195,7 @@ function prepareHexaRound(){
   const cfg=hexaConfig();hexaState.timeLeft=cfg.time*1000;
   renderHexaBoard();updateHexaHud();setHexaCoach('idle',hexaState.round+'라운드! 1부터 '+cfg.count+'까지 차례대로 눌러보자!');
   if($('hexaStartBtn')){$('hexaStartBtn').textContent=hexaState.round+'라운드 시작';$('hexaStartBtn').classList.remove('hidden')}
+  if($('hexaQuitBtn'))$('hexaQuitBtn').textContent='그만하기';
 }
 function startHexaRound(){
   if(hexaState.running)return;
@@ -210,8 +226,10 @@ function finishHexaRound(success){
     hexaState.totalMs+=Math.max(0,cfg.time*1000-hexaState.timeLeft);hexaState.roundCleared=true;
     if(hexaState.round>=10){
       hexaState.finished=true;state.stars+=12;state.xp+=60;while(state.xp>=100){state.xp-=100;state.level++}
-      setHexaCoach('correct','10라운드 완주! 정말 빠르고 정확했어! ⭐ +12');
-      $('hexaStartBtn').textContent='처음부터 다시';$('hexaStartBtn').classList.remove('hidden');updateHud();
+      setHexaCoach('correct','10라운드 완주! 여기서 게임이 종료됐어. 정말 잘했어! ⭐ +12');
+      $('hexaStartBtn').textContent='처음부터 다시';$('hexaStartBtn').classList.remove('hidden');
+      if($('hexaQuitBtn'))$('hexaQuitBtn').textContent='놀이로 돌아가기';
+      updateHud();
     }else{
       setHexaCoach('correct',hexaState.round+'라운드 성공! 다음 라운드로 가자!');
       $('hexaStartBtn').textContent='다음 라운드';$('hexaStartBtn').classList.remove('hidden');
@@ -371,6 +389,7 @@ $('numberHexaCard')?.addEventListener('click',openHexaGame);
 $('numberTowerCard')?.addEventListener('click',openTowerGame);
 $('hexaStartBtn')?.addEventListener('click',handleHexaStart);
 $('hexaBackBtn')?.addEventListener('click',showPlay);
+$('hexaQuitBtn')?.addEventListener('click',()=>{stopHexaGame(false);showPlay()});
 $('towerStartBtn')?.addEventListener('click',startTowerGame);
 $('towerBackBtn')?.addEventListener('click',showPlay);
 $('catchStartBtn')?.addEventListener('click',startNumberCatch);
