@@ -59,3 +59,4 @@
   .game-stage .avatar-layer{height:112px}
   .game-stage .question{font-size:32px}
 }
+.quick-card.league-card{grid-column:1/-1;background:linear-gradient(145deg,#fff3bf,#ffe0f1);border:1px solid #fff}.quick-card.league-card .quick-icon{font-size:38px}.quick-card.league-card b{font-size:18px}.quick-card.league-card i{font-size:30px}
