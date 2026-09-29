@@ -55,6 +55,28 @@ function leaguePlayerScore(){return Math.max(0,Math.round(state.stars*7+state.co
 function buildLeagueRows(tab){const rand=seeded(leagueSeed());const bots=leagueBots100().map(function(b){const wobble=Math.round((rand()-.5)*90);const growth=Math.max(8,Math.round(25+rand()*125));return {...b,bot:true,score:Math.max(100,b.base+wobble),growth:growth}});const me={name:currentChild?.nickname||'나',avatar:currentChild?.avatar_key==='star'?'⭐':currentChild?.avatar_key==='cloud'?'☁️':'🤖',bot:false,score:leaguePlayerScore(),growth:Math.max(0,Math.round((mastery()-50)*2+state.correct*4))};const rows=bots.concat([me]).sort(function(a,b){return tab==='growth'?b.growth-a.growth:b.score-a.score});return rows.map(function(x,i){return {...x,rank:i+1}})}
 function renderLeague(tab){tab=tab||'rank';const rows=buildLeagueRows(tab);const list=$('leagueList');if(!list)return;const q=currentChild?.current_quarter||1;$('leagueScope').textContent=activeGrade()+'학년 · '+q+'분기 · 주간 TOP 100';list.innerHTML='';rows.forEach(function(x){const medal=x.rank===1?'🥇':x.rank===2?'🥈':x.rank===3?'🥉':x.rank;const el=document.createElement('div');el.className='league-row'+(x.rank<=3?' top3':'')+(x.bot?'':' me');const scoreText=tab==='growth'?('+'+x.growth):(x.score.toLocaleString()+'점');const scoreSub=tab==='growth'?'이번 주 성장':'리그 포인트';el.innerHTML='<div class="league-rank">'+medal+'</div><div class="league-avatar">'+x.avatar+'</div><div class="league-person"><b>'+x.name+''+'</b><small>'+activeGrade()+'학년 · '+q+'분기</small></div><div class="league-score"><b>'+scoreText+'</b><small>'+scoreSub+'</small></div>';list.appendChild(el)});const me=rows.find(function(x){return !x.bot});$('myLeagueCard').innerHTML='<div><b>내 순위 · '+me.rank+'위</b><span>이번 주 '+(tab==='growth'?('성장 +'+me.growth):('리그 '+me.score.toLocaleString()+'점'))+'</span></div><strong>'+(me.rank<=3?'🔥':'🚀')+'</strong>'}
 let catchState={running:false,lives:5,score:0,combo:0,level:1,answer:0,timer:null,spawnTimer:null};
+const catchRobotPoses={idle:'suki_01_greet.png',correct:'suki_03_correct.png',cheer:'suki_04_cheer.png',think:'suki_05_think.png',surprise:'suki_07_surprise.png',jump:'avatar_08_jump.png',hint:'suki_09_hint.png',complete:'suki_12_complete.png'};
+function catchRobotReact(type='idle',message='정답 숫자를 잡아봐!'){
+  const wrap=$('catchRobot'),img=$('catchRobotImage'),bubble=$('catchRobotBubble');
+  if(!wrap||!img||!bubble)return;
+  img.src=SUKI_BASE+(catchRobotPoses[type]||catchRobotPoses.idle);
+  bubble.textContent=message;
+  wrap.classList.remove('react-correct','react-wrong','react-combo','react-start','react-end');
+  void wrap.offsetWidth;
+  if(type==='correct')wrap.classList.add('react-correct');
+  else if(type==='surprise'||type==='think')wrap.classList.add('react-wrong');
+  else if(type==='cheer'||type==='jump')wrap.classList.add('react-combo');
+  else if(type==='complete')wrap.classList.add('react-end');
+  else wrap.classList.add('react-start');
+}
+function ensureCatchRobot(){
+  const arena=$('catchArena');if(!arena)return;
+  if(!$('catchRobot')){
+    const wrap=document.createElement('div');wrap.id='catchRobot';wrap.className='catch-robot';wrap.innerHTML='<img id="catchRobotImage" src="'+SUKI_BASE+catchRobotPoses.idle+'" alt="수키 로봇"/><div id="catchRobotBubble" class="catch-robot-bubble">정답 숫자를 잡아봐!</div>';
+    arena.appendChild(wrap);
+  }
+}
+
 function showPlay(){hideMainScreens();$('playPanel')?.classList.remove('hidden');$('playMenu')?.classList.remove('hidden');$('numberCatch')?.classList.add('hidden');document.querySelectorAll('.nav-item').forEach(x=>x.classList.toggle('active',x.dataset.nav==='play'))}
 function catchQuestion(){
  const grade=activeGrade();let a,b,op='+',answer;
@@ -69,24 +91,25 @@ function catchChoices(){const s=new Set([catchState.answer]);while(s.size<4){con
 function spawnCatchWave(){
  if(!catchState.running)return;
  const arena=$('catchArena');if(!arena)return;
- arena.innerHTML='';
+ ensureCatchRobot();arena.querySelectorAll('.fall-number,.catch-end-card').forEach(x=>x.remove());
  const vals=catchChoices(),correctIndex=vals.indexOf(catchState.answer);
  vals.forEach((v,i)=>{
    const btn=document.createElement('button');btn.className='fall-number';btn.textContent=v;btn.style.left=(8+i*23+Math.floor(Math.random()*6))+'%';
    const duration=Math.max(2.4,5.4-catchState.level*.28);btn.style.animationDuration=duration+'s';
    btn.dataset.correct=String(i===correctIndex);
-   btn.onclick=()=>{if(!catchState.running)return;if(btn.dataset.correct==='true'){btn.classList.add('catch-hit');catchState.score+=10+catchState.combo*2;catchState.combo++;if(catchState.score>=catchState.level*80)catchState.level++;updateCatchHud();clearTimeout(catchState.timer);setTimeout(()=>{catchQuestion();spawnCatchWave()},220)}else{btn.classList.add('catch-wrong');loseCatchLife()}};
+   btn.onclick=()=>{if(!catchState.running)return;if(btn.dataset.correct==='true'){btn.classList.add('catch-hit');catchState.score+=10+catchState.combo*2;catchState.combo++;if(catchState.combo>0&&catchState.combo%5===0)catchRobotReact('cheer','🔥 '+catchState.combo+'콤보! 최고야!');else catchRobotReact('correct',pickCatchPraise());if(catchState.score>=catchState.level*80)catchState.level++;updateCatchHud();clearTimeout(catchState.timer);setTimeout(()=>{catchQuestion();spawnCatchWave()},360)}else{btn.classList.add('catch-wrong');catchRobotReact('surprise','앗! 다시 잘 보고 잡아보자!');loseCatchLife()}};
    arena.appendChild(btn);
  });
  clearTimeout(catchState.timer);
  const missMs=Math.max(2500,5400-catchState.level*280);
  catchState.timer=setTimeout(()=>{if(!catchState.running)return;loseCatchLife();if(catchState.running){catchQuestion();spawnCatchWave()}},missMs);
 }
-function loseCatchLife(){catchState.lives--;catchState.combo=0;updateCatchHud();$('catchArena')?.classList.add('catch-flash');setTimeout(()=>$('catchArena')?.classList.remove('catch-flash'),260);if(catchState.lives<=0)endNumberCatch()}
-function startNumberCatch(){catchState={running:true,lives:5,score:0,combo:0,level:1,answer:0,timer:null,spawnTimer:null};$('catchStartBtn').classList.add('hidden');$('catchQuitBtn').classList.remove('hidden');catchQuestion();updateCatchHud();spawnCatchWave()}
-function endNumberCatch(){catchState.running=false;clearTimeout(catchState.timer);$('catchArena').innerHTML='<div style="display:grid;place-items:center;height:100%;font-weight:1000;font-size:26px;color:#fff;text-align:center">게임 종료!<br><span style="font-size:18px">점수 '+catchState.score+'점</span></div>';$('catchStartBtn').textContent='다시 하기';$('catchStartBtn').classList.remove('hidden');$('catchQuitBtn').classList.remove('hidden');state.stars+=Math.floor(catchState.score/50);state.xp+=Math.min(40,Math.floor(catchState.score/10));while(state.xp>=100){state.xp-=100;state.level++}updateHud()}
+function pickCatchPraise(){const a=['정답! 잘했어!','좋아! 바로 그거야!','멋져! 계속 가자!','정확해!'];return a[Math.floor(Math.random()*a.length)]}
+function loseCatchLife(){catchState.lives--;catchState.combo=0;updateCatchHud();$('catchArena')?.classList.add('catch-flash');setTimeout(()=>$('catchArena')?.classList.remove('catch-flash'),260);if(catchState.lives<=0)endNumberCatch();else setTimeout(()=>catchRobotReact('think','괜찮아! 다음 숫자를 잘 보자.'),260)}
+function startNumberCatch(){catchState={running:true,lives:5,score:0,combo:0,level:1,answer:0,timer:null,spawnTimer:null};ensureCatchRobot();$('catchStartBtn').classList.add('hidden');$('catchQuitBtn').classList.remove('hidden');catchQuestion();updateCatchHud();catchRobotReact('idle','시작! 정답 숫자를 잡아봐!');spawnCatchWave()}
+function endNumberCatch(){catchState.running=false;clearTimeout(catchState.timer);ensureCatchRobot();$('catchArena')?.querySelectorAll('.fall-number').forEach(x=>x.remove());const end=document.createElement('div');end.className='catch-end-card';end.innerHTML='<b>게임 종료!</b><span>점수 '+catchState.score+'점</span>';$('catchArena')?.appendChild(end);catchRobotReact('complete',catchState.score>=100?'대단해! 기록이 정말 좋아!':'잘했어! 다음엔 더 높이 가보자!');$('catchStartBtn').textContent='다시 하기';$('catchStartBtn').classList.remove('hidden');$('catchQuitBtn').classList.remove('hidden');state.stars+=Math.floor(catchState.score/50);state.xp+=Math.min(40,Math.floor(catchState.score/10));while(state.xp>=100){state.xp-=100;state.level++}updateHud()}
 function stopNumberCatch(resetView=true){if(catchState?.timer)clearTimeout(catchState.timer);if(catchState)catchState.running=false;if(resetView&&$('catchArena'))$('catchArena').innerHTML=''}
-function openNumberCatch(){hideMainScreens();$('playPanel')?.classList.remove('hidden');$('playMenu')?.classList.add('hidden');$('numberCatch')?.classList.remove('hidden');$('catchArena').innerHTML='';$('catchStartBtn').textContent='게임 시작';$('catchStartBtn').classList.remove('hidden');$('catchQuitBtn').classList.add('hidden');catchState={running:false,lives:5,score:0,combo:0,level:1,answer:0,timer:null,spawnTimer:null};catchQuestion();updateCatchHud()}
+function openNumberCatch(){hideMainScreens();$('playPanel')?.classList.remove('hidden');$('playMenu')?.classList.add('hidden');$('numberCatch')?.classList.remove('hidden');$('catchArena').innerHTML='';ensureCatchRobot();catchRobotReact('idle','정답 숫자를 잡아봐!');$('catchStartBtn').textContent='게임 시작';$('catchStartBtn').classList.remove('hidden');$('catchQuitBtn').classList.add('hidden');catchState={running:false,lives:5,score:0,combo:0,level:1,answer:0,timer:null,spawnTimer:null};catchQuestion();updateCatchHud()}
 function showLeague(){hideMainScreens();$('leaguePanel').classList.remove('hidden');document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.nav==='league')});renderLeague(document.querySelector('.league-tab.active')?.dataset.leagueTab||'rank')}
 function gradeTitle(g){return g+'학년'}
 function updateGradePickers(){document.querySelectorAll('.grade-picker button').forEach(function(btn){btn.classList.toggle('active',Number(btn.dataset.grade)===activeGrade())});const hint=$('gradePickerHint');if(hint)hint.textContent=activeGrade()+'학년 수학으로 보고 있어요'}
