@@ -104,8 +104,8 @@ function spawnCatchWave(){
  const vals=catchChoices(),correctIndex=vals.indexOf(catchState.answer);
  vals.forEach((v,i)=>{
    const btn=document.createElement('button');btn.className='fall-number';btn.textContent=v;btn.style.left=(8+i*23+Math.floor(Math.random()*6))+'%';
-   const stageDurations=[0,8.5,7.8,7.1,6.4,5.7,5.0];
-   const paceMultiplier={slow:1.15,normal:1,fast:.82}[catchState.pace]||1.15;
+   const stageDurations=[0,11.5,10.5,9.6,8.8,8.0,7.3];
+   const paceMultiplier={slow:1.28,normal:1.1,fast:.92}[catchState.pace]||1.28;
    const duration=(stageDurations[Math.min(catchState.level,6)]||5)*paceMultiplier;
    btn.style.animationDuration=duration+'s';
    btn.dataset.correct=String(i===correctIndex);
