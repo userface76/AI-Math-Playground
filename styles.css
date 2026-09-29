@@ -64,3 +64,57 @@
 .grade-picker-wrap{padding:14px 14px 0;background:#fff9}.world-grade-picker-wrap{padding:0 0 14px;background:transparent}.grade-picker-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}.grade-picker-head b{font-size:14px;color:#3b307d}.grade-picker-head span{font-size:10px;color:#8e86a4}.grade-picker{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}.grade-picker button{border:0;border-radius:12px;padding:10px 2px;background:#f3f0ff;color:#756aa4;font-size:11px;font-weight:900}.grade-picker button.active{background:linear-gradient(145deg,#6f5ee8,#9a7af2);color:#fff;box-shadow:0 5px 12px #6654da3b;transform:translateY(-1px)}@media(max-width:390px){.grade-picker{grid-template-columns:repeat(3,1fr)}.grade-picker button{padding:9px 4px}.grade-picker-head{align-items:flex-start;flex-direction:column;gap:2px}}
 
 .game-actions{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}.game-actions .primary{margin-top:0}.quit-btn{width:100%;border:0;border-radius:17px;padding:14px;font-weight:900;background:#f3f0ff;color:#695c9d;box-shadow:0 4px 0 #ded8f5;cursor:pointer}.game-actions:has(.quit-btn:not(.hidden)){grid-template-columns:1.25fr .75fr}.game-actions:has(.quit-btn:not(.hidden)) .primary{margin:0}.quit-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #ded8f5}
+
+/* Mobile game screen: keep every problem fully inside one viewport width */
+.game-stage,
+.game-stage .game-panel,
+.game-stage .question,
+.game-stage .visual,
+.game-stage .answers{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  box-sizing:border-box;
+}
+.game-stage{
+  overflow-x:hidden;
+}
+.game-stage .game-panel{
+  overflow:hidden;
+}
+.game-stage .visual{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:flex-start;
+  align-items:center;
+  gap:3px;
+  white-space:normal;
+  overflow-x:hidden;
+  overflow-y:auto;
+  font-size:clamp(24px,8vw,34px);
+  letter-spacing:0;
+  word-break:break-word;
+}
+.game-stage .question{
+  font-size:clamp(27px,8vw,40px);
+  line-height:1.32;
+  white-space:normal;
+  word-break:keep-all;
+  overflow-wrap:anywhere;
+}
+.game-stage .answers{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+.game-stage .answer{
+  min-width:0;
+  width:100%;
+  font-size:clamp(20px,6vw,23px);
+}
+@media(max-width:390px){
+  .game-stage{padding-left:10px;padding-right:10px}
+  .game-stage .game-panel{padding:15px}
+  .game-stage .visual{font-size:clamp(22px,7.5vw,30px)}
+  .game-stage .question{font-size:clamp(25px,8vw,32px);padding:11px 12px}
+  .game-stage .answers{gap:8px}
+  .game-stage .answer{padding:14px 8px}
+}
