@@ -53,6 +53,12 @@
       <button id="catchBackBtn" class="back-btn">‹ 놀이</button>
       <div class="catch-stats"><span id="catchLives">❤️❤️❤️❤️❤️</span><b id="catchScore">0점</b><em id="catchCombo">콤보 0</em><strong id="catchStage">1단계 · 천천히</strong></div>
     </div>
+    <div class="catch-speed-control" aria-label="게임 속도 조절">
+      <span>속도</span>
+      <button type="button" class="catch-speed active" data-catch-speed="slow">천천히</button>
+      <button type="button" class="catch-speed" data-catch-speed="normal">보통</button>
+      <button type="button" class="catch-speed" data-catch-speed="fast">빠르게</button>
+    </div>
     <div id="catchArena" class="catch-arena" aria-label="떨어지는 숫자 게임 영역">
       <div id="catchRobot" class="catch-robot" aria-live="polite">
         <img id="catchRobotImage" src="public/assets/suki/suki_01_greet.png" alt="수키 로봇"/>
