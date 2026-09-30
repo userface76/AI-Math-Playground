@@ -393,23 +393,23 @@ function crossCoach(kind='idle',message='빈칸을 누르고 아래 숫자 타�
   if(status)status.textContent=message;
 }
 function makeCrossPuzzle(round=1){
-  const max=round<=2?9:round<=4?15:20;
-  const b=2+Math.floor(Math.random()*Math.max(2,max-4));
-  const a=1+Math.floor(Math.random()*Math.max(2,max-b));
+  const cap=round<=2?9:round<=4?15:20;
+  const b=2+Math.floor(Math.random()*Math.max(2,cap-4));
+  const a=1+Math.floor(Math.random()*Math.max(2,cap-b));
   const c=a+b;
-  const d=b+2+Math.floor(Math.random()*Math.max(2,max-b));
-  const e=d-b;
-  const f=2+Math.floor(Math.random()*Math.max(2,max-2));
-  const g=b*f;
+  const e=1+Math.floor(Math.random()*Math.max(2,Math.min(9,b)));
+  const d=b+e;
+  const f=2+Math.floor(Math.random()*Math.max(2,Math.min(6,cap-1)));
+  const g=f*e;
   const h=1+Math.floor(Math.random()*Math.max(2,Math.min(9,g)));
   const i=g-h;
   return {
+    rows:9,cols:5,
     cells:[
-      {r:1,c:0,t:'num',v:a,blank:true},{r:1,c:1,t:'op',v:'+'},{r:1,c:2,t:'num',v:b,blank:true},{r:1,c:3,t:'op',v:'='},{r:1,c:4,t:'num',v:c,blank:false},
-      {r:0,c:2,t:'num',v:d,blank:true},{r:2,c:2,t:'op',v:'-'},{r:3,c:2,t:'num',v:b,blank:false},{r:4,c:2,t:'op',v:'='},{r:5,c:2,t:'num',v:e,blank:true},
-      {r:3,c:1,t:'op',v:'×'},{r:3,c:0,t:'num',v:f,blank:true},{r:3,c:3,t:'op',v:'='},{r:3,c:4,t:'num',v:g,blank:true},
-      {r:5,c:1,t:'op',v:'-'},{r:5,c:0,t:'num',v:g,blank:false},{r:5,c:3,t:'op',v:'='},{r:5,c:4,t:'num',v:i,blank:true},
-      {r:4,c:4,t:'op',v:'+'},{r:2,c:4,t:'num',v:h,blank:true},{r:1,c:4,t:'num',v:c,blank:false}
+      {r:2,c:0,t:'num',v:a,blank:true},{r:2,c:1,t:'op',v:'+'},{r:2,c:2,t:'num',v:b,blank:true},{r:2,c:3,t:'op',v:'='},{r:2,c:4,t:'num',v:c,blank:false},
+      {r:0,c:2,t:'num',v:d,blank:true},{r:1,c:2,t:'op',v:'-'},{r:3,c:2,t:'op',v:'='},{r:4,c:2,t:'num',v:e,blank:true},
+      {r:4,c:0,t:'num',v:f,blank:true},{r:4,c:1,t:'op',v:'×'},{r:4,c:3,t:'op',v:'='},{r:4,c:4,t:'num',v:g,blank:true},
+      {r:5,c:4,t:'op',v:'-'},{r:6,c:4,t:'num',v:h,blank:true},{r:7,c:4,t:'op',v:'='},{r:8,c:4,t:'num',v:i,blank:true}
     ]
   };
 }
@@ -418,6 +418,7 @@ function prepareCrossRound(){
   const p=makeCrossPuzzle(crossState.round);
   const uniq=new Map();
   p.cells.forEach((cell,idx)=>uniq.set(cell.r+':'+cell.c,{...cell,id:'c'+idx}));
+  crossState.rows=p.rows||9;crossState.cols=p.cols||5;
   crossState.slots=[...uniq.values()].filter(x=>x.t==='num'&&x.blank).map((x,i)=>({...x,slotId:'s'+i,placed:null}));
   crossState.cells=[...uniq.values()];
   crossState.bank=miniShuffle(crossState.slots.map((s,i)=>({id:'b'+i,value:s.v,used:false})));
@@ -430,7 +431,8 @@ function renderCross(){
   const board=$('crossBoard'),bank=$('crossBank');if(!board||!bank)return;
   board.innerHTML='';bank.innerHTML='';
   const slotMap=new Map(crossState.slots.map(s=>[s.r+':'+s.c,s]));
-  for(let r=0;r<6;r++)for(let col=0;col<5;col++){
+  board.style.setProperty('--cross-rows',crossState.rows||9);board.style.setProperty('--cross-cols',crossState.cols||5);
+  for(let r=0;r<(crossState.rows||9);r++)for(let col=0;col<(crossState.cols||5);col++){
     const key=r+':'+col,cell=crossState.cells.find(x=>x.r===r&&x.c===col);
     const el=document.createElement(cell&&cell.t==='num'&&cell.blank?'button':'div');
     el.className='cross-cell';
