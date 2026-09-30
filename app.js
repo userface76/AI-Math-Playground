@@ -419,7 +419,7 @@ function prepareCrossRound(){
   const uniq=new Map();
   p.cells.forEach((cell,idx)=>uniq.set(cell.r+':'+cell.c,{...cell,id:'c'+idx}));
   crossState.rows=p.rows||9;crossState.cols=p.cols||5;
-  crossState.slots=[...uniq.values()].filter(x=>x.t==='num'&&x.blank).map((x,i)=>({...x,slotId:'s'+i,placed:null}));
+  crossState.slots=[...uniq.values()].filter(x=>x.t==='num'&&x.blank).map((x,i)=>({...x,slotId:'s'+i,placed:null,tileId:null}));
   crossState.cells=[...uniq.values()];
   crossState.bank=miniShuffle(crossState.slots.map((s,i)=>({id:'b'+i,value:s.v,used:false})));
   renderCross();
@@ -460,11 +460,8 @@ function placeCrossTile(tileId){
   const tile=crossState.bank.find(x=>x.id===tileId);if(!tile||tile.used)return;
   if(!crossState.selectedSlot){crossCoach('surprise','먼저 퍼즐의 빈칸 하나를 눌러줘!');return}
   const slot=crossState.slots.find(x=>x.slotId===crossState.selectedSlot);if(!slot)return;
-  if(slot.placed!=null){
-    const old=crossState.bank.find(x=>x.used&&x.value===slot.placed);
-    if(old)old.used=false;
-  }
-  slot.placed=tile.value;tile.used=true;crossState.selectedSlot=null;renderCross();checkCrossSolved();
+  if(slot.placed!=null&&slot.tileId){const old=crossState.bank.find(x=>x.id===slot.tileId);if(old)old.used=false}
+  slot.placed=tile.value;slot.tileId=tile.id;tile.used=true;crossState.selectedSlot=null;renderCross();checkCrossSolved();
 }
 function checkCrossSolved(){
   if(crossState.slots.some(s=>s.placed==null))return;
@@ -477,7 +474,7 @@ function checkCrossSolved(){
   }else crossCoach('surprise','거의 다 왔어! 계산식을 다시 한번 확인해봐.');
 }
 function resetCross(){
-  crossState.slots.forEach(s=>s.placed=null);crossState.bank.forEach(b=>b.used=false);crossState.selectedSlot=null;renderCross();crossCoach('idle','다시 시작! 가로·세로 식을 함께 봐보자.');
+  crossState.slots.forEach(s=>{s.placed=null;s.tileId=null});crossState.bank.forEach(b=>b.used=false);crossState.selectedSlot=null;renderCross();crossCoach('idle','다시 시작! 가로·세로 식을 함께 봐보자.');
 }
 function hintCross(){
   const target=crossState.slots.find(s=>s.placed==null||String(s.placed)!==String(s.v));if(!target)return;
@@ -490,7 +487,7 @@ function openCrossGame(){
 }
 function nextCrossRound(){
   if(!crossState.solved)return;
-  if(crossState.round>=crossState.maxRounds){crossCoach('correct','5라운드 완료! 수키 연산크로스 클리어!');$('crossNextBtn').textContent='놀이로 돌아가기';$('crossNextBtn').onclick=showPlay;return}
+  if(crossState.round>=crossState.maxRounds){crossCoach('correct','5라운드 완료! 수키 연산크로스 클리어!');showPlay();return}
   crossState.round++;prepareCrossRound();
 }
 function showLeague(){hideMainScreens();$('leaguePanel').classList.remove('hidden');document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.nav==='league')});renderLeague(document.querySelector('.league-tab.active')?.dataset.leagueTab||'rank')}
