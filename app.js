@@ -79,7 +79,7 @@ function ensureCatchRobot(){
   }
 }
 
-function showPlay(){hideMainScreens();$('playPanel')?.classList.remove('hidden');$('playMenu')?.classList.remove('hidden');$('numberCatch')?.classList.add('hidden');$('numberHexa')?.classList.add('hidden');$('numberTower')?.classList.add('hidden');document.querySelectorAll('.nav-item').forEach(x=>x.classList.toggle('active',x.dataset.nav==='play'))}
+function showPlay(){hideMainScreens();$('playPanel')?.classList.remove('hidden');$('playMenu')?.classList.remove('hidden');$('numberCatch')?.classList.add('hidden');$('numberHexa')?.classList.add('hidden');$('numberTower')?.classList.add('hidden');$('mathCross')?.classList.add('hidden');document.querySelectorAll('.nav-item').forEach(x=>x.classList.toggle('active',x.dataset.nav==='play'))}
 function catchQuestion(){
  const grade=activeGrade();let a,b,op='+',answer;
  if(grade<=1){a=1+Math.floor(Math.random()*9);b=1+Math.floor(Math.random()*Math.max(1,10-a));answer=a+b}
@@ -249,7 +249,7 @@ function handleHexaStart(){
   startHexaRound();
 }
 function openHexaGame(){
-  hideMainScreens();$('playPanel')?.classList.remove('hidden');$('playMenu')?.classList.add('hidden');$('numberCatch')?.classList.add('hidden');$('numberTower')?.classList.add('hidden');$('numberHexa')?.classList.remove('hidden');
+  hideMainScreens();$('playPanel')?.classList.remove('hidden');$('playMenu')?.classList.add('hidden');$('numberCatch')?.classList.add('hidden');$('numberTower')?.classList.add('hidden');$('mathCross')?.classList.add('hidden');$('numberHexa')?.classList.remove('hidden');
   hexaState={round:1,running:false,next:1,timeLeft:40000,endAt:0,timer:null,mistakes:0,totalMs:0,roundCleared:false,finished:false};prepareHexaRound();
 }
 function stopHexaGame(resetView=true){
@@ -371,7 +371,7 @@ function endTowerGame(won){
   $('towerStartBtn')?.classList.remove('hidden');
 }
 function openTowerGame(){
-  hideMainScreens();$('playPanel')?.classList.remove('hidden');$('playMenu')?.classList.add('hidden');$('numberCatch')?.classList.add('hidden');$('numberHexa')?.classList.add('hidden');$('numberTower')?.classList.remove('hidden');
+  hideMainScreens();$('playPanel')?.classList.remove('hidden');$('playMenu')?.classList.add('hidden');$('numberCatch')?.classList.add('hidden');$('numberHexa')?.classList.add('hidden');$('mathCross')?.classList.add('hidden');$('numberTower')?.classList.remove('hidden');
   clearTimeout(towerState.burstTimer);
   towerState={running:false,locked:false,tiles:buildTowerTiles(),tray:[],score:0,combo:0,gameOver:false,burstTimer:null};
   renderTowerBoard();renderTowerTray();setTowerCoach('idle','숫자 블록이 층층이 쌓여 있어. 위에 드러난 타일부터 선택할 수 있어!');
@@ -384,6 +384,113 @@ function stopTowerGame(resetView=true){
   if(resetView){if($('towerBoard'))$('towerBoard').innerHTML='';if($('towerTray'))$('towerTray').innerHTML=''}
 }
 
+
+let crossState={round:1,maxRounds:5,selectedSlot:null,slots:[],bank:[],solved:false};
+
+function crossCoach(kind='idle',message='빈칸을 누르고 아래 숫자 타일을 골라봐!'){
+  const img=$('crossCoachImage'),status=$('crossStatus');
+  if(img)img.src=SUKI_BASE+(kind==='correct'?'suki_minigame_correct.webp':kind==='surprise'?'suki_07_surprise.png':'suki_minigame_idle.webp');
+  if(status)status.textContent=message;
+}
+function makeCrossPuzzle(round=1){
+  const max=round<=2?9:round<=4?15:20;
+  const b=2+Math.floor(Math.random()*Math.max(2,max-4));
+  const a=1+Math.floor(Math.random()*Math.max(2,max-b));
+  const c=a+b;
+  const d=b+2+Math.floor(Math.random()*Math.max(2,max-b));
+  const e=d-b;
+  const f=2+Math.floor(Math.random()*Math.max(2,max-2));
+  const g=b*f;
+  const h=1+Math.floor(Math.random()*Math.max(2,Math.min(9,g)));
+  const i=g-h;
+  return {
+    cells:[
+      {r:1,c:0,t:'num',v:a,blank:true},{r:1,c:1,t:'op',v:'+'},{r:1,c:2,t:'num',v:b,blank:true},{r:1,c:3,t:'op',v:'='},{r:1,c:4,t:'num',v:c,blank:false},
+      {r:0,c:2,t:'num',v:d,blank:true},{r:2,c:2,t:'op',v:'-'},{r:3,c:2,t:'num',v:b,blank:false},{r:4,c:2,t:'op',v:'='},{r:5,c:2,t:'num',v:e,blank:true},
+      {r:3,c:1,t:'op',v:'×'},{r:3,c:0,t:'num',v:f,blank:true},{r:3,c:3,t:'op',v:'='},{r:3,c:4,t:'num',v:g,blank:true},
+      {r:5,c:1,t:'op',v:'-'},{r:5,c:0,t:'num',v:g,blank:false},{r:5,c:3,t:'op',v:'='},{r:5,c:4,t:'num',v:i,blank:true},
+      {r:4,c:4,t:'op',v:'+'},{r:2,c:4,t:'num',v:h,blank:true},{r:1,c:4,t:'num',v:c,blank:false}
+    ]
+  };
+}
+function prepareCrossRound(){
+  crossState.selectedSlot=null;crossState.solved=false;
+  const p=makeCrossPuzzle(crossState.round);
+  const uniq=new Map();
+  p.cells.forEach((cell,idx)=>uniq.set(cell.r+':'+cell.c,{...cell,id:'c'+idx}));
+  crossState.slots=[...uniq.values()].filter(x=>x.t==='num'&&x.blank).map((x,i)=>({...x,slotId:'s'+i,placed:null}));
+  crossState.cells=[...uniq.values()];
+  crossState.bank=miniShuffle(crossState.slots.map((s,i)=>({id:'b'+i,value:s.v,used:false})));
+  renderCross();
+  $('crossRound').textContent='ROUND '+crossState.round+'/'+crossState.maxRounds;
+  $('crossNextBtn')?.classList.add('hidden');
+  crossCoach('idle','빈칸을 누르고 아래 숫자 타일을 골라봐!');
+}
+function renderCross(){
+  const board=$('crossBoard'),bank=$('crossBank');if(!board||!bank)return;
+  board.innerHTML='';bank.innerHTML='';
+  const slotMap=new Map(crossState.slots.map(s=>[s.r+':'+s.c,s]));
+  for(let r=0;r<6;r++)for(let col=0;col<5;col++){
+    const key=r+':'+col,cell=crossState.cells.find(x=>x.r===r&&x.c===col);
+    const el=document.createElement(cell&&cell.t==='num'&&cell.blank?'button':'div');
+    el.className='cross-cell';
+    el.style.gridRow=String(r+1);el.style.gridColumn=String(col+1);
+    if(!cell){el.classList.add('cross-empty');board.appendChild(el);continue}
+    if(cell.t==='op'){el.classList.add('cross-op');el.textContent=cell.v}
+    else if(cell.blank){
+      const slot=slotMap.get(key);el.classList.add('cross-slot');el.dataset.slot=slot.slotId;
+      if(slot.placed!=null){el.textContent=slot.placed;el.classList.add('filled')}
+      else el.textContent='?';
+      if(crossState.selectedSlot===slot.slotId)el.classList.add('selected');
+      el.addEventListener('click',()=>{if(crossState.solved)return;crossState.selectedSlot=slot.slotId;renderCross()});
+    }else{el.classList.add('cross-fixed');el.textContent=cell.v}
+    board.appendChild(el);
+  }
+  crossState.bank.forEach(tile=>{
+    const b=document.createElement('button');b.type='button';b.className='cross-bank-tile';b.textContent=tile.value;b.disabled=tile.used;
+    b.addEventListener('click',()=>placeCrossTile(tile.id));bank.appendChild(b);
+  });
+  const filled=crossState.slots.filter(s=>s.placed!=null).length;
+  $('crossFilled').textContent=filled+'/'+crossState.slots.length;
+}
+function placeCrossTile(tileId){
+  if(crossState.solved)return;
+  const tile=crossState.bank.find(x=>x.id===tileId);if(!tile||tile.used)return;
+  if(!crossState.selectedSlot){crossCoach('surprise','먼저 퍼즐의 빈칸 하나를 눌러줘!');return}
+  const slot=crossState.slots.find(x=>x.slotId===crossState.selectedSlot);if(!slot)return;
+  if(slot.placed!=null){
+    const old=crossState.bank.find(x=>x.used&&x.value===slot.placed);
+    if(old)old.used=false;
+  }
+  slot.placed=tile.value;tile.used=true;crossState.selectedSlot=null;renderCross();checkCrossSolved();
+}
+function checkCrossSolved(){
+  if(crossState.slots.some(s=>s.placed==null))return;
+  const ok=crossState.slots.every(s=>String(s.placed)===String(s.v));
+  if(ok){
+    crossState.solved=true;crossCoach('correct','정답! 가로와 세로 계산이 모두 맞았어!');
+    state.stars+=3;state.xp+=15;while(state.xp>=100){state.xp-=100;state.level++}
+    $('crossNextBtn').textContent=crossState.round>=crossState.maxRounds?'완료':'다음 라운드';
+    $('crossNextBtn').classList.remove('hidden');updateHud();
+  }else crossCoach('surprise','거의 다 왔어! 계산식을 다시 한번 확인해봐.');
+}
+function resetCross(){
+  crossState.slots.forEach(s=>s.placed=null);crossState.bank.forEach(b=>b.used=false);crossState.selectedSlot=null;renderCross();crossCoach('idle','다시 시작! 가로·세로 식을 함께 봐보자.');
+}
+function hintCross(){
+  const target=crossState.slots.find(s=>s.placed==null||String(s.placed)!==String(s.v));if(!target)return;
+  crossState.selectedSlot=target.slotId;renderCross();crossCoach('idle','힌트: 선택된 빈칸에는 '+target.v+'가 들어가야 해!');
+}
+function openCrossGame(){
+  hideMainScreens();$('playPanel')?.classList.remove('hidden');$('playMenu')?.classList.add('hidden');
+  $('numberCatch')?.classList.add('hidden');$('numberHexa')?.classList.add('hidden');$('numberTower')?.classList.add('hidden');$('mathCross')?.classList.remove('hidden');
+  crossState={round:1,maxRounds:5,selectedSlot:null,slots:[],bank:[],solved:false};prepareCrossRound();
+}
+function nextCrossRound(){
+  if(!crossState.solved)return;
+  if(crossState.round>=crossState.maxRounds){crossCoach('correct','5라운드 완료! 수키 연산크로스 클리어!');$('crossNextBtn').textContent='놀이로 돌아가기';$('crossNextBtn').onclick=showPlay;return}
+  crossState.round++;prepareCrossRound();
+}
 function showLeague(){hideMainScreens();$('leaguePanel').classList.remove('hidden');document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.nav==='league')});renderLeague(document.querySelector('.league-tab.active')?.dataset.leagueTab||'rank')}
 function gradeTitle(g){return g+'학년'}
 function updateGradePickers(){document.querySelectorAll('.grade-picker button').forEach(function(btn){btn.classList.toggle('active',Number(btn.dataset.grade)===activeGrade())});const hint=$('gradePickerHint');if(hint)hint.textContent=activeGrade()+'학년 수학으로 보고 있어요'}
@@ -442,12 +549,18 @@ document.querySelectorAll('.grade-picker button').forEach(function(btn){btn.addE
 $('numberCatchCard')?.addEventListener('click',openNumberCatch);
 $('numberHexaCard')?.addEventListener('click',openHexaGame);
 $('numberTowerCard')?.addEventListener('click',openTowerGame);
+$('mathCrossCard')?.addEventListener('click',openCrossGame);
 $('hexaStartBtn')?.addEventListener('click',handleHexaStart);
 $('hexaBackBtn')?.addEventListener('click',showPlay);
 $('hexaQuitBtn')?.addEventListener('click',()=>{stopHexaGame(false);showPlay()});
 $('towerStartBtn')?.addEventListener('click',startTowerGame);
 $('towerBackBtn')?.addEventListener('click',showPlay);
 $('towerQuitBtn')?.addEventListener('click',()=>{stopTowerGame(false);showPlay()});
+$('crossBackBtn')?.addEventListener('click',showPlay);
+$('crossQuitBtn')?.addEventListener('click',showPlay);
+$('crossResetBtn')?.addEventListener('click',resetCross);
+$('crossHintBtn')?.addEventListener('click',hintCross);
+$('crossNextBtn')?.addEventListener('click',nextCrossRound);
 $('catchStartBtn')?.addEventListener('click',startNumberCatch);
 $('catchQuitBtn')?.addEventListener('click',showPlay);
 $('catchBackBtn')?.addEventListener('click',showPlay);
