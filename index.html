@@ -59,7 +59,7 @@
     </button>
     <button id="mathCrossCard" class="play-game-card cross-card">
       <div class="play-game-icon">✚</div>
-      <div><b>수키 연산크로스</b><span>가로·세로 계산식을 동시에 완성해봐!</span><small>5라운드 · 숫자 타일을 빈칸에 넣는 퍼즐</small></div>
+      <div><b>수키 연산크로스</b><span>가로·세로 계산식을 동시에 완성해봐!</span><small>쉬움·보통·도전 3단계 · 5라운드</small></div>
       <i>›</i>
     </button>
   </div>
@@ -112,11 +112,18 @@
       <button id="crossBackBtn" class="back-btn">‹ 놀이</button>
       <div class="cross-stats"><b id="crossRound">ROUND 1/5</b><strong id="crossFilled">0/0</strong></div>
     </div>
+    <div class="cross-difficulty" aria-label="연산크로스 난이도">
+      <span>난이도</span>
+      <button type="button" class="cross-diff active" data-cross-diff="easy">쉬움</button>
+      <button type="button" class="cross-diff" data-cross-diff="normal">보통</button>
+      <button type="button" class="cross-diff" data-cross-diff="hard">도전</button>
+    </div>
     <div class="mini-coach">
       <img id="crossCoachImage" src="public/assets/suki/suki_minigame_idle.webp" alt="수키"/>
       <div id="crossStatus" aria-live="polite">빈칸을 누르고 아래 숫자 타일을 골라봐!</div>
     </div>
     <div id="crossBoard" class="cross-board" aria-label="연산 크로스 퍼즐"></div>
+    <div id="crossCelebrate" class="cross-celebrate" aria-hidden="true"></div>
     <div class="cross-bank-wrap">
       <div class="cross-bank-head"><span>숫자 타일</span><small>빈칸 선택 → 숫자 선택</small></div>
       <div id="crossBank" class="cross-bank" aria-label="사용할 숫자 타일"></div>
