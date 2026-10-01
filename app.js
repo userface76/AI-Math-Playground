@@ -385,37 +385,67 @@ function stopTowerGame(resetView=true){
 }
 
 
-let crossState={round:1,maxRounds:5,selectedSlot:null,slots:[],bank:[],solved:false};
+let crossState={round:1,maxRounds:5,difficulty:'easy',selectedSlot:null,slots:[],bank:[],solved:false};
 
 function crossCoach(kind='idle',message='빈칸을 누르고 아래 숫자 타일을 골라봐!'){
   const img=$('crossCoachImage'),status=$('crossStatus');
   if(img)img.src=SUKI_BASE+(kind==='correct'?'suki_minigame_correct.webp':kind==='surprise'?'suki_07_surprise.png':'suki_minigame_idle.webp');
   if(status)status.textContent=message;
 }
-function makeCrossPuzzle(round=1){
-  const cap=round<=2?9:round<=4?15:20;
-  const b=2+Math.floor(Math.random()*Math.max(2,cap-4));
-  const a=1+Math.floor(Math.random()*Math.max(2,cap-b));
+function crossDifficultyLabel(diff=crossState.difficulty){return diff==='hard'?'도전':diff==='normal'?'보통':'쉬움'}
+function makeCrossPuzzle(round=1,diff=crossState.difficulty){
+  const cap=diff==='easy'?(round<=2?10:15):diff==='normal'?(round<=2?15:24):(round<=2?20:35);
+  const b=2+Math.floor(Math.random()*Math.max(2,Math.min(cap-3,9)));
+  const a=1+Math.floor(Math.random()*Math.max(2,Math.min(cap-b,9)));
   const c=a+b;
-  const e=1+Math.floor(Math.random()*Math.max(2,Math.min(9,b)));
+  const e=1+Math.floor(Math.random()*Math.max(2,Math.min(8,b)));
   const d=b+e;
-  const f=2+Math.floor(Math.random()*Math.max(2,Math.min(6,cap-1)));
+  const base=[
+    {r:2,c:0,t:'num',v:a,blank:true},{r:2,c:1,t:'op',v:'+'},{r:2,c:2,t:'num',v:b,blank:true},{r:2,c:3,t:'op',v:'='},{r:2,c:4,t:'num',v:c,blank:false},
+    {r:0,c:2,t:'num',v:d,blank:true},{r:1,c:2,t:'op',v:'-'},{r:3,c:2,t:'op',v:'='},{r:4,c:2,t:'num',v:e,blank:true}
+  ];
+  if(diff==='easy')return {rows:5,cols:5,cells:base};
+
+  const f=2+Math.floor(Math.random()*Math.max(2,diff==='hard'?6:4));
   const g=f*e;
+  const medium=[
+    ...base,
+    {r:4,c:0,t:'num',v:f,blank:true},{r:4,c:1,t:'op',v:'×'},{r:4,c:3,t:'op',v:'='},{r:4,c:4,t:'num',v:g,blank:true}
+  ];
+  if(diff==='normal')return {rows:5,cols:5,cells:medium};
+
   const h=1+Math.floor(Math.random()*Math.max(2,Math.min(9,g)));
   const i=g-h;
   return {
     rows:9,cols:5,
     cells:[
-      {r:2,c:0,t:'num',v:a,blank:true},{r:2,c:1,t:'op',v:'+'},{r:2,c:2,t:'num',v:b,blank:true},{r:2,c:3,t:'op',v:'='},{r:2,c:4,t:'num',v:c,blank:false},
-      {r:0,c:2,t:'num',v:d,blank:true},{r:1,c:2,t:'op',v:'-'},{r:3,c:2,t:'op',v:'='},{r:4,c:2,t:'num',v:e,blank:true},
-      {r:4,c:0,t:'num',v:f,blank:true},{r:4,c:1,t:'op',v:'×'},{r:4,c:3,t:'op',v:'='},{r:4,c:4,t:'num',v:g,blank:true},
+      ...medium,
       {r:5,c:4,t:'op',v:'-'},{r:6,c:4,t:'num',v:h,blank:true},{r:7,c:4,t:'op',v:'='},{r:8,c:4,t:'num',v:i,blank:true}
     ]
   };
 }
+function launchCrossCelebration(big=false){
+  const host=$('crossCelebrate');if(!host)return;
+  host.innerHTML='';host.classList.remove('show','big');void host.offsetWidth;
+  const symbols=['✦','★','✨','●'],count=big?54:28;
+  for(let i=0;i<count;i++){
+    const p=document.createElement('i');
+    p.textContent=symbols[Math.floor(Math.random()*symbols.length)];
+    p.style.left=(44+Math.random()*12)+'%';
+    p.style.top=(34+Math.random()*18)+'%';
+    p.style.setProperty('--dx',Math.round((Math.random()-.5)*(big?420:290))+'px');
+    p.style.setProperty('--dy',Math.round((Math.random()-.58)*(big?390:260))+'px');
+    p.style.setProperty('--delay',(Math.random()*.22)+'s');
+    p.style.setProperty('--spin',Math.round((Math.random()-.5)*720)+'deg');
+    p.style.setProperty('--size',(big?18+Math.random()*18:13+Math.random()*13)+'px');
+    host.appendChild(p);
+  }
+  host.classList.add('show');if(big)host.classList.add('big');
+  setTimeout(()=>{host.classList.remove('show','big');host.innerHTML=''},big?1800:1250);
+}
 function prepareCrossRound(){
   crossState.selectedSlot=null;crossState.solved=false;
-  const p=makeCrossPuzzle(crossState.round);
+  const p=makeCrossPuzzle(crossState.round,crossState.difficulty);
   const uniq=new Map();
   p.cells.forEach((cell,idx)=>uniq.set(cell.r+':'+cell.c,{...cell,id:'c'+idx}));
   crossState.rows=p.rows||9;crossState.cols=p.cols||5;
@@ -423,9 +453,11 @@ function prepareCrossRound(){
   crossState.cells=[...uniq.values()];
   crossState.bank=miniShuffle(crossState.slots.map((s,i)=>({id:'b'+i,value:s.v,used:false})));
   renderCross();
-  $('crossRound').textContent='ROUND '+crossState.round+'/'+crossState.maxRounds;
+  $('crossRound').textContent='ROUND '+crossState.round+'/'+crossState.maxRounds+' · '+crossDifficultyLabel();
+  document.querySelectorAll('.cross-diff').forEach(btn=>btn.classList.toggle('active',btn.dataset.crossDiff===crossState.difficulty));
   $('crossNextBtn')?.classList.add('hidden');
-  crossCoach('idle','빈칸을 누르고 아래 숫자 타일을 골라봐!');
+  const guide=crossState.difficulty==='easy'?'덧셈·뺄셈 두 식부터 천천히 맞춰보자!':crossState.difficulty==='normal'?'세 개의 식이 연결돼 있어. 교차 숫자를 잘 봐!':'네 개의 식이 이어져 있어! 하나씩 풀면 돼.';
+  crossCoach('idle',guide);
 }
 function renderCross(){
   const board=$('crossBoard'),bank=$('crossBank');if(!board||!bank)return;
@@ -467,9 +499,15 @@ function checkCrossSolved(){
   if(crossState.slots.some(s=>s.placed==null))return;
   const ok=crossState.slots.every(s=>String(s.placed)===String(s.v));
   if(ok){
-    crossState.solved=true;crossCoach('correct','정답! 가로와 세로 계산이 모두 맞았어!');
-    state.stars+=3;state.xp+=15;while(state.xp>=100){state.xp-=100;state.level++}
-    $('crossNextBtn').textContent=crossState.round>=crossState.maxRounds?'완료':'다음 라운드';
+    crossState.solved=true;
+    const finalRound=crossState.round>=crossState.maxRounds;
+    const reward=crossState.difficulty==='hard'?4:crossState.difficulty==='normal'?3:2;
+    state.stars+=reward;state.xp+=10+reward*2;
+    if(finalRound)state.stars+=5;
+    while(state.xp>=100){state.xp-=100;state.level++}
+    launchCrossCelebration(finalRound);
+    crossCoach('correct',finalRound?'🎉 5라운드 모두 완료! 연산크로스 클리어!':'정답! 가로와 세로 계산이 모두 맞았어! ⭐ +'+reward);
+    $('crossNextBtn').textContent=finalRound?'놀이로 돌아가기':'다음 라운드';
     $('crossNextBtn').classList.remove('hidden');updateHud();
   }else crossCoach('surprise','거의 다 왔어! 계산식을 다시 한번 확인해봐.');
 }
@@ -483,11 +521,11 @@ function hintCross(){
 function openCrossGame(){
   hideMainScreens();$('playPanel')?.classList.remove('hidden');$('playMenu')?.classList.add('hidden');
   $('numberCatch')?.classList.add('hidden');$('numberHexa')?.classList.add('hidden');$('numberTower')?.classList.add('hidden');$('mathCross')?.classList.remove('hidden');
-  crossState={round:1,maxRounds:5,selectedSlot:null,slots:[],bank:[],solved:false};prepareCrossRound();
+  crossState={round:1,maxRounds:5,difficulty:'easy',selectedSlot:null,slots:[],bank:[],solved:false};prepareCrossRound();
 }
 function nextCrossRound(){
   if(!crossState.solved)return;
-  if(crossState.round>=crossState.maxRounds){crossCoach('correct','5라운드 완료! 수키 연산크로스 클리어!');showPlay();return}
+  if(crossState.round>=crossState.maxRounds){showPlay();return}
   crossState.round++;prepareCrossRound();
 }
 function showLeague(){hideMainScreens();$('leaguePanel').classList.remove('hidden');document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.nav==='league')});renderLeague(document.querySelector('.league-tab.active')?.dataset.leagueTab||'rank')}
@@ -572,4 +610,12 @@ document.querySelectorAll('.catch-speed').forEach(btn=>btn.addEventListener('cli
     spawnCatchWave();
     catchRobotReact('idle',catchState.pace==='slow'?'천천히 해보자!':catchState.pace==='fast'?'좋아! 빠르게 도전!':'보통 속도로 가자!');
   }
+}));
+
+document.querySelectorAll('.cross-diff').forEach(btn=>btn.addEventListener('click',()=>{
+  const diff=btn.dataset.crossDiff||'easy';
+  if(crossState.difficulty===diff&&!crossState.solved)return;
+  crossState.difficulty=diff;crossState.round=1;crossState.selectedSlot=null;crossState.solved=false;
+  prepareCrossRound();
+  crossCoach('idle',crossDifficultyLabel(diff)+' 난이도로 새로 시작해볼게!');
 }));
