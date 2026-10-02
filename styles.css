@@ -379,3 +379,6 @@
 @media(prefers-reduced-motion:reduce){
   .cross-celebrate i{animation:none!important;opacity:1}
 }
+
+.runner-card{background:linear-gradient(145deg,#edf8ff,#fff1e8)}
+.runner-card .play-game-icon{font-size:34px}
