@@ -25,8 +25,8 @@ canvas{display:block;width:100%;height:auto;touch-action:none}
   <div class="hero"><h1>💥 MOB BLASTER</h1><p>게이트로 화력을 키우고 적 타워를 부숴라!</p></div>
   <div class="hud">
     <div>STAGE<b id="stage">1</b></div>
+    <div>HP<b id="hp">❤️❤️❤️❤️❤️</b></div>
     <div>POWER<b id="power">10</b></div>
-    <div>TARGET<b id="target">40</b></div>
   </div>
   <div class="game">
     <canvas id="game" width="420" height="700"></canvas>
@@ -40,7 +40,7 @@ canvas{display:block;width:100%;height:auto;touch-action:none}
 <script>
 (()=>{
 const c=document.getElementById('game'),x=c.getContext('2d'),$=id=>document.getElementById(id);
-let stage=1,lane=1,power=10,target=40,running=false,progress=0,last=0,speed=128,bullets=[],gates=[],enemies=[],fx=[];
+let stage=1,lane=1,power=10,hp=5,target=40,running=false,progress=0,last=0,speed=128,bullets=[],enemyBullets=[],gates=[],enemies=[],fx=[],enemyShotClock=0;
 const lanes=[105,210,315],length=2200;
 function rnd(seed){const v=Math.sin(seed*999.13)*10000;return v-Math.floor(v)}
 function makeStage(){
@@ -57,8 +57,8 @@ function makeStage(){
  }
  target=35+Math.floor(stage*6.5);$('target').textContent=target;
 }
-function reset(){lane=1;power=10+Math.floor(stage/5);progress=0;speed=128+Math.min(45,stage*.9);makeStage();updateHud()}
-function updateHud(){$('stage').textContent=stage;$('power').textContent=Math.max(0,Math.floor(power));$('target').textContent=target}
+function reset(){lane=1;power=10+Math.floor(stage/5);hp=5;progress=0;enemyShotClock=0;enemyBullets=[];speed=128+Math.min(45,stage*.9);makeStage();updateHud()}
+function updateHud(){$('stage').textContent=stage;$('power').textContent=Math.max(0,Math.floor(power));if($('hp'))$('hp').textContent='❤️'.repeat(hp)+'♡'.repeat(Math.max(0,5-hp))}
 function move(d){if(running)lane=Math.max(0,Math.min(2,lane+d))}
 function project(z){const rel=z-progress,t=1-Math.max(0,Math.min(1,rel/760));return{y:115+t*520,s:.34+t*.95}}
 function fire(dt){
@@ -66,10 +66,30 @@ function fire(dt){
  if(fire.acc>.12){fire.acc=0;bullets.push({lane,z:progress+40})}
  bullets.forEach(b=>b.z+=380*dt);
  bullets=bullets.filter(b=>b.z<progress+800);
+
+ enemyShotClock+=dt;
+ if(enemyShotClock>.75){
+   enemyShotClock=0;
+   const shooters=enemies.filter(e=>!e.hit&&e.z-progress>120&&e.z-progress<650);
+   if(shooters.length){
+     const e=shooters[Math.floor(Math.random()*shooters.length)];
+     enemyBullets.push({lane:e.lane,z:e.z});
+   }
+ }
+ enemyBullets.forEach(b=>b.z-=210*dt);
+ enemyBullets=enemyBullets.filter(b=>b.z>progress-80&&b.z<progress+800);
 }
 function collide(){
- for(const g of gates){if(g.used)continue;const dz=g.z-progress;if(dz<45&&dz>-15&&g.lane===lane){g.used=true;if(g.op==='+')power+=g.v;if(g.op==='×')power*=g.v;if(g.op==='-')power=Math.max(1,power-g.v);if(g.op==='÷')power=Math.max(1,Math.floor(power/g.v));burst(lanes[lane],560,g.op==='-'||g.op==='÷'?'bad':'good');updateHud()}}
+ for(const g of gates){if(g.used)continue;const dz=g.z-progress;if(dz<45&&dz>-15&&g.lane===lane){g.used=true;if(g.op==='+')power+=g.v;if(g.op==='×')power*=g.v;if(g.op==='-')power=Math.max(0,power-g.v);if(g.op==='÷')power=Math.max(0,Math.floor(power/g.v));burst(lanes[lane],560,g.op==='-'||g.op==='÷'?'bad':'good');updateHud()}}
  for(const e of enemies){if(e.hit)continue;for(const b of bullets){if(Math.abs(b.z-e.z)<35&&b.lane===e.lane){e.hp-=Math.max(1,power*.035);b.z=999999;if(e.hp<=0){e.hit=true;power+=2;burst(lanes[e.lane],project(e.z).y,'good');updateHud()}break}}}
+ for(const b of enemyBullets){
+   if(b.hit)continue;
+   if(Math.abs(b.z-progress)<38&&b.lane===lane){
+     b.hit=true;hp--;burst(lanes[lane],590,'bad');updateHud();
+     if(hp<=0){gameOver('적의 공격에 HP가 모두 소진됐어!');return}
+   }
+ }
+ if(power<=0){gameOver('POWER가 0이 됐어! 마이너스 게이트를 피해야 해.')}
 }
 function burst(px,py,type){for(let i=0;i<12;i++)fx.push({x:px,y:py,vx:(Math.random()-.5)*140,vy:(Math.random()-.5)*140,life:.65,type})}
 function updateFx(dt){fx.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt});fx=fx.filter(p=>p.life>0)}
@@ -87,12 +107,21 @@ function drawEnemy(e){
  if(e.hit)return;const p=project(e.z);if(e.z-progress< -60||e.z-progress>780)return;const px=lanes[e.lane];
  x.fillStyle='#d94b4b';x.fillRect(px-24*p.s,p.y-20*p.s,48*p.s,40*p.s);x.fillStyle='#fff';x.font='900 '+Math.max(11,17*p.s)+'px system-ui';x.textAlign='center';x.fillText(Math.max(0,Math.ceil(e.hp)),px,p.y+2)
 }
-function drawBullets(){x.fillStyle='#fff86b';for(const b of bullets){const p=project(b.z);x.beginPath();x.arc(lanes[b.lane],p.y,5*p.s+2,0,Math.PI*2);x.fill()}}
+function drawBullets(){
+ x.fillStyle='#fff86b';for(const b of bullets){const p=project(b.z);x.beginPath();x.arc(lanes[b.lane],p.y,5*p.s+2,0,Math.PI*2);x.fill()}
+ x.fillStyle='#ff4f68';for(const b of enemyBullets){if(b.hit)continue;const p=project(b.z);x.beginPath();x.arc(lanes[b.lane],p.y,6*p.s+2,0,Math.PI*2);x.fill()}
+}
 function drawPlayer(){
  const px=lanes[lane];x.save();x.translate(px,592);x.fillStyle='#2d65db';x.fillRect(-25,-28,50,46);x.fillStyle='#173e9e';x.fillRect(-18,18,14,24);x.fillRect(4,18,14,24);x.fillStyle='#ffd45c';x.beginPath();x.arc(0,-30,18,0,Math.PI*2);x.fill();x.fillStyle='#fff';x.font='900 13px system-ui';x.textAlign='center';x.fillText(Math.floor(power),0,-2);x.restore()
 }
 function drawFx(){for(const p of fx){x.globalAlpha=Math.max(0,p.life/.65);x.fillStyle=p.type==='bad'?'#ff6a6a':'#fff06a';x.fillRect(p.x,p.y,5,5)}x.globalAlpha=1}
+function gameOver(reason){
+ running=false;$('title').textContent='☠️ GAME OVER';
+ $('msg').innerHTML=reason+'<br>HP와 POWER를 지키면서 다시 도전해보세요.';
+ $('start').textContent='다시 도전';$('overlay').classList.remove('hidden')
+}
 function finish(){
+ if(!running)return;
  running=false;const win=power>=target;$('title').textContent=win?'🏆 타워 파괴 성공!':'💥 화력이 부족했어!';
  $('msg').innerHTML='최종 화력 <b>'+Math.floor(power)+'</b> · 목표 <b>'+target+'</b><br>'+(win?'다음 단계는 더 강한 적이 기다려요.':'마이너스 게이트를 피하고 배수 게이트를 노려보세요.');
  $('start').textContent=win?'다음 단계':'다시 도전';if(win)stage++;$('overlay').classList.remove('hidden')
