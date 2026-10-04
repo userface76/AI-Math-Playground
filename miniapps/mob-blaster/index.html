@@ -10,13 +10,13 @@
 .wrap{max-width:520px;margin:auto;min-height:100vh;padding:14px 14px 24px}
 .top{display:flex;justify-content:space-between;align-items:center;gap:8px}.top a{text-decoration:none;color:#51459c;font-weight:900}.badge{background:#fff;border-radius:999px;padding:8px 12px;font-size:11px;font-weight:900}
 .hero{margin:12px 0;background:#ffffffd8;border-radius:24px;padding:16px;box-shadow:0 15px 36px #30408020}.hero h1{margin:0 0 4px;font-size:28px}.hero p{margin:0;color:#6b718e;font-size:13px}
-.hud{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}.hud div{background:#ffffffeb;border-radius:14px;padding:9px;text-align:center;font-size:11px}.hud b{display:block;font-size:18px}
+.hud{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}.hud div{background:#ffffffeb;border-radius:14px;padding:9px;text-align:center;font-size:11px}.hud b{display:block;font-size:18px}
 .game{position:relative;border:4px solid #fff;border-radius:26px;overflow:hidden;box-shadow:0 16px 36px #30407028;background:#8fd5ff}
 canvas{display:block;width:100%;height:auto;touch-action:none}
 .overlay{position:absolute;inset:0;display:grid;place-items:center;background:#13214a66;padding:20px}.overlay.hidden{display:none}.panel{background:#fff;width:100%;border-radius:22px;padding:18px;text-align:center}.panel h2{margin:0 0 6px}.panel p{margin:0 0 14px;color:#686f88;font-size:13px;line-height:1.5}
 .btn{width:100%;border:0;border-radius:16px;padding:14px;background:linear-gradient(135deg,#6556e8,#9a78ef);color:#fff;font-weight:900;font-size:16px;box-shadow:0 5px 0 #4e40b4}
 .controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.control{border:0;border-radius:18px;padding:15px;background:#fff;color:#493d91;font-size:23px;font-weight:1000;box-shadow:0 5px 0 #dcd6fa}
-.note{margin-top:10px;text-align:center;color:#68708a;font-size:11px}
+.note{margin-top:10px;text-align:center;color:#68708a;font-size:11px}.btn,.control{touch-action:manipulation}.overlay{z-index:20}@media(max-width:390px){.hud{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
@@ -27,14 +27,15 @@ canvas{display:block;width:100%;height:auto;touch-action:none}
     <div>STAGE<b id="stage">1</b></div>
     <div>HP<b id="hp">❤️❤️❤️❤️❤️</b></div>
     <div>POWER<b id="power">10</b></div>
+    <div>TARGET<b id="target">40</b></div>
   </div>
   <div class="game">
     <canvas id="game" width="420" height="700"></canvas>
     <div id="overlay" class="overlay">
-      <div class="panel"><h2 id="title">1단계 준비!</h2><p id="msg">좋은 게이트를 골라 화력을 키우세요.<br>빨간 마이너스 게이트는 피하는 게 좋아요.</p><button id="start" class="btn">전투 시작</button></div>
+      <div class="panel"><h2 id="title">1단계 준비!</h2><p id="msg">좋은 게이트를 골라 화력을 키우세요.<br>빨간 마이너스 게이트는 피하는 게 좋아요.</p><button id="start" type="button" class="btn">전투 시작</button></div>
     </div>
   </div>
-  <div class="controls"><button id="left" class="control">◀</button><button id="right" class="control">▶</button></div>
+  <div class="controls"><button id="left" type="button" class="control">◀</button><button id="right" type="button" class="control">▶</button></div>
   <div class="note">자동 발사 · 좌우 이동 · + / × / - / ÷ 게이트</div>
 </div>
 <script>
@@ -55,10 +56,10 @@ function makeStage(){
   gates.push({lane:alt,z,op:badType>.5?'-':'÷',v:badType>.5?(2+Math.floor(rnd(base+19)*6)):2,used:false});
   if(i%2===1)enemies.push({lane:Math.floor(rnd(base+21)*3),z:z+105,hp:8+Math.floor(stage*1.8)+i*2,hit:false});
  }
- target=35+Math.floor(stage*6.5);$('target').textContent=target;
+ target=35+Math.floor(stage*6.5);if($('target'))$('target').textContent=target;
 }
 function reset(){lane=1;power=10+Math.floor(stage/5);hp=5;progress=0;enemyShotClock=0;enemyBullets=[];speed=128+Math.min(45,stage*.9);makeStage();updateHud()}
-function updateHud(){$('stage').textContent=stage;$('power').textContent=Math.max(0,Math.floor(power));if($('hp'))$('hp').textContent='❤️'.repeat(hp)+'♡'.repeat(Math.max(0,5-hp))}
+function updateHud(){if($('stage'))$('stage').textContent=stage;if($('power'))$('power').textContent=Math.max(0,Math.floor(power));if($('hp'))$('hp').textContent='❤️'.repeat(hp)+'♡'.repeat(Math.max(0,5-hp));if($('target'))$('target').textContent=target}
 function move(d){if(running)lane=Math.max(0,Math.min(2,lane+d))}
 function project(z){const rel=z-progress,t=1-Math.max(0,Math.min(1,rel/760));return{y:115+t*520,s:.34+t*.95}}
 function fire(dt){
