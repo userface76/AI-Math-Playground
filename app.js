@@ -589,6 +589,7 @@ $('numberTowerCard')?.addEventListener('click',openTowerGame);
 $('mathCrossCard')?.addEventListener('click',openCrossGame);
 $('run1000Card')?.addEventListener('click',()=>{window.location.href='miniapps/runner1000/'});
 $('mobBlasterCard')?.addEventListener('click',()=>{window.location.href='miniapps/mob-blaster/'});
+$('numberMahjongCard')?.addEventListener('click',()=>{window.location.href='miniapps/number-mahjong/'});
 $('hexaStartBtn')?.addEventListener('click',handleHexaStart);
 $('hexaBackBtn')?.addEventListener('click',showPlay);
 $('hexaQuitBtn')?.addEventListener('click',()=>{stopHexaGame(false);showPlay()});
