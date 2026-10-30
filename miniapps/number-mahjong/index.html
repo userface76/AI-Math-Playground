@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>수키 숫자마작</title>
+<style>
+:root{--ink:#2f3158;--violet:#7465e8;--pink:#ff6f9d;--cream:#f8f4ea;--green:#72b82f}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:linear-gradient(#eef8ff,#f7f1ff);color:var(--ink)}
+.wrap{max-width:520px;margin:auto;min-height:100vh;padding:14px 14px 28px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.top a{text-decoration:none;color:#51459c;font-weight:900}.badge{background:#fff;border-radius:999px;padding:8px 12px;font-size:11px;font-weight:900}
+.hero{margin:12px 0;background:#ffffffdd;border-radius:24px;padding:16px;box-shadow:0 14px 34px #4d4b8c1c}
+.hero h1{margin:0 0 4px;font-size:28px}.hero p{margin:0;color:#767995;font-size:13px;line-height:1.45}
+.hud{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+.hud div{background:#fff;border-radius:14px;padding:9px;text-align:center;font-size:11px}.hud b{display:block;font-size:18px}
+.board{position:relative;min-height:430px;border-radius:26px;overflow:hidden;background:radial-gradient(circle at 50% 35%,#fff,#eaf4ff 58%,#ece9ff 100%);box-shadow:inset 0 0 0 3px #ffffffa8}
+.board:before{content:"";position:absolute;left:12%;right:12%;bottom:8%;height:17%;border-radius:50%;background:#5e578c1a;filter:blur(16px)}
+.tile{position:absolute;width:62px;height:74px;border:2px solid #fff;border-radius:11px;display:grid;place-items:center;transform:translate(-50%,-50%) translate(calc(var(--z)*4px),calc(var(--z)*-7px)) rotate(var(--tilt));box-shadow:0 7px 0 #b7aecf,0 12px 20px #473f702f,inset 0 2px 0 #fff;background:linear-gradient(145deg,#fffdf7,#f2eadb);color:#40376e;font-weight:1000;cursor:pointer;transition:transform .15s ease,opacity .15s ease,filter .15s ease}
+.tile span{font-size:25px;line-height:1}.tile small{font-size:17px;line-height:1}
+.tile.covered{filter:saturate(.65) brightness(.87);opacity:.7;cursor:default}.tile.free:active{transform:translate(-50%,-50%) translate(calc(var(--z)*4px),calc(var(--z)*-3px)) rotate(var(--tilt)) scale(.94)}
+.tile.num-1{background:linear-gradient(145deg,#fff3f6,#ffd7e0)}.tile.num-2{background:linear-gradient(145deg,#fffbed,#ffeaa0)}
+.tile.num-3{background:linear-gradient(145deg,#f1fff7,#cfeeda)}.tile.num-4{background:linear-gradient(145deg,#f1fbff,#cde9ff)}
+.tile.num-5{background:linear-gradient(145deg,#faf6ff,#e5d9ff)}.tile.num-6{background:linear-gradient(145deg,#fff5e8,#ffd8ad)}
+.tile.num-7{background:linear-gradient(145deg,#eefcff,#bfeaf1)}.tile.num-8{background:linear-gradient(145deg,#fff1fb,#ffd1ef)}
+.coach{display:grid;grid-template-columns:64px 1fr;gap:10px;align-items:center;background:#fff;border-radius:20px;padding:9px 12px;margin:10px 0;box-shadow:0 8px 22px #5d4ea214}
+.coach .face{font-size:42px;text-align:center}.coach div:last-child{font-size:13px;font-weight:900;line-height:1.4}
+.tray-wrap{background:#fff;border-radius:22px;padding:12px;box-shadow:0 10px 24px #5d4ea214;margin-top:10px}
+.tray-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:11px;font-weight:900;color:#5b527a}
+.tray{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.slot{aspect-ratio:1;border:2px dashed #d9d2eb;border-radius:10px;display:grid;place-items:center;color:#c1b9d5;font-weight:1000;font-size:18px}
+.slot.filled{border-style:solid;color:#362f73;background:#f7f4ff;animation:pop .22s ease}
+@keyframes pop{50%{transform:scale(1.1)}}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.actions button{border:0;border-radius:16px;padding:13px;font-weight:900}
+.primary{background:linear-gradient(135deg,#7465e8,#9c7bf0);color:#fff;box-shadow:0 5px 0 #594bb6}.ghost{background:#fff;color:#625796}
+.overlay{position:absolute;inset:0;display:grid;place-items:center;background:#18234d66;padding:20px;z-index:30}.overlay.hidden{display:none}.panel{background:#fff;border-radius:22px;padding:18px;text-align:center;width:100%}.panel h2{margin:0 0 6px}.panel p{margin:0 0 14px;color:#6d708b;font-size:13px;line-height:1.5}
+.celebrate{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:25}.spark{position:absolute;font-style:normal;animation:boom 1s ease-out forwards}
+@keyframes boom{0%{opacity:1;transform:translate(0,0) scale(.3)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(1.1) rotate(360deg)}}
+@media(max-width:390px){.board{min-height:360px}.tile{width:54px;height:64px}.tile span{font-size:22px}.tray{gap:3px}.slot{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../../">‹ AI Math Playground</a><div class="badge">NUMBER MAHJONG</div></div>
+  <div class="hero"><h1>🀄 수키 숫자마작</h1><p>드러난 숫자 타일을 골라 아래 칸에 모아보세요. 같은 숫자 3개가 모이면 펑!</p></div>
+  <div class="hud"><div>STAGE<b id="stage">1</b></div><div>SCORE<b id="score">0</b></div><div>LEFT<b id="leftCount">0</b></div></div>
+  <div class="coach"><div class="face">🤖</div><div id="status">위에 드러난 타일부터 선택할 수 있어!</div></div>
+  <div id="board" class="board"><div id="celebrate" class="celebrate"></div></div>
+  <div class="tray-wrap">
+    <div class="tray-head"><span>보관칸</span><b id="trayCount">0/7</b></div>
+    <div id="tray" class="tray"></div>
+  </div>
+  <div class="actions"><button id="shuffle" type="button" class="ghost">🔀 섞기 1회</button><button id="hint" type="button" class="primary">💡 힌트</button></div>
+</div>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+let stage=1,score=0,tiles=[],tray=[],locked=false,shuffleUsed=false;
+const symbols=['⭐','🍎','💎','☁️','❤️','🍬','🌙','🎁'];
+
+function rand(seed){const x=Math.sin(seed*999.31)*10000;return x-Math.floor(x)}
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b}
+function build(){
+  const pairs=6+Math.min(2,Math.floor(stage/4));
+  const values=[];for(let n=1;n<=pairs;n++)for(let k=0;k<3;k++)values.push(n);
+  const vals=shuffle(values);
+  const positions=[
+    [18,24,0],[34,22,0],[50,24,0],[66,22,0],[82,24,0],
+    [26,41,0],[42,39,0],[58,41,0],[74,39,0],
+    [34,58,0],[50,56,0],[66,58,0],
+    [42,73,0],[58,73,0],
+    [50,38,1],[42,53,1],[58,53,1],[50,67,2],
+    [26,60,1],[74,60,1],[18,48,1],[82,48,1],[34,70,2],[66,70,2]
+  ];
+  tiles=vals.map((v,i)=>{
+    const p=positions[i%positions.length];
+    return {id:i,value:v,x:p[0],y:p[1],z:p[2],removed:false};
+  });
+}
+function covered(t){
+  return tiles.some(o=>!o.removed&&o.z>t.z&&Math.abs(o.x-t.x)<10&&Math.abs(o.y-t.y)<13);
+}
+function render(){
+  const board=$('board');board.querySelectorAll('.tile').forEach(n=>n.remove());
+  tiles.forEach(t=>{
+    if(t.removed)return;
+    const b=document.createElement('button');b.type='button';b.className='tile num-'+t.value;
+    const isCovered=covered(t);b.classList.add(isCovered?'covered':'free');
+    b.style.left=t.x+'%';b.style.top=t.y+'%';b.style.setProperty('--z',t.z);b.style.setProperty('--tilt',((t.id%5)-2)*1.1+'deg');
+    b.innerHTML='<span>'+t.value+'</span><small>'+symbols[(t.value-1)%symbols.length]+'</small>';
+    b.disabled=isCovered||locked;b.addEventListener('click',()=>pick(t.id));board.appendChild(b);
+  });
+  $('leftCount').textContent=tiles.filter(t=>!t.removed).length;renderTray();
+}
+function renderTray(){
+  const host=$('tray');host.innerHTML='';
+  for(let i=0;i<7;i++){const s=document.createElement('div');s.className='slot';if(tray[i]!=null){s.classList.add('filled');s.textContent=tray[i]}else s.textContent='·';host.appendChild(s)}
+  $('trayCount').textContent=tray.length+'/7';
+}
+function pick(id){
+  if(locked)return;const t=tiles.find(x=>x.id===id);if(!t||t.removed||covered(t))return;
+  t.removed=true;tray.push(t.value);score+=5;$('score').textContent=score;render();
+  setTimeout(resolveTray,120);
+}
+function resolveTray(){
+  const counts={};tray.forEach(v=>counts[v]=(counts[v]||0)+1);
+  const hit=Object.keys(counts).find(k=>counts[k]>=3);
+  if(hit){
+    locked=true;let removed=0;tray=tray.filter(v=>{if(String(v)===String(hit)&&removed<3){removed++;return false}return true});
+    score+=30;$('score').textContent=score;$('status').textContent=hit+' 세 개 완성! 펑! 🎉';fireworks(false);
+    setTimeout(()=>{locked=false;render();checkEnd()},420);return;
+  }
+  checkEnd();
+}
+function checkEnd(){
+  if(tiles.every(t=>t.removed)&&tray.length===0){
+    locked=true;score+=100;$('score').textContent=score;$('status').textContent='스테이지 클리어! 🎉';fireworks(true);
+    setTimeout(()=>{stage++;$('stage').textContent=stage;tray=[];shuffleUsed=false;locked=false;build();render();$('status').textContent='새 스테이지! 같은 숫자 3개를 모아봐!'},1200);return;
+  }
+  if(tray.length>=7){
+    locked=true;showOverlay('😵 보관칸이 가득 찼어!','같은 숫자 3개를 더 빨리 만들어야 해.','다시 도전');
+  }
+}
+function hint(){
+  const free=tiles.filter(t=>!t.removed&&!covered(t));if(!free.length)return;
+  const counts={};tray.forEach(v=>counts[v]=(counts[v]||0)+1);
+  let best=free.find(t=>(counts[t.value]||0)>=2)||free.find(t=>(counts[t.value]||0)>=1)||free[0];
+  $('status').textContent='힌트: '+best.value+' 타일을 찾아봐!';
+  const el=[...document.querySelectorAll('.tile')].find(n=>n.querySelector('span')?.textContent==String(best.value)&&!n.disabled);
+  if(el){el.animate([{transform:el.style.transform},{filter:'brightness(1.35)'},{filter:'brightness(1)'}],{duration:650,iterations:2})}
+}
+function shuffleFree(){
+  if(shuffleUsed)return;$('status').textContent='드러난 타일을 한 번 섞었어!';
+  const free=tiles.filter(t=>!t.removed&&!covered(t));const vals=shuffle(free.map(t=>t.value));free.forEach((t,i)=>t.value=vals[i]);shuffleUsed=true;$('shuffle').disabled=true;$('shuffle').textContent='🔀 사용 완료';render()
+}
+function fireworks(big){
+  const host=$('celebrate');const n=big?42:20;for(let i=0;i<n;i++){const s=document.createElement('i');s.className='spark';s.textContent=['✨','★','●','✦'][i%4];s.style.left=(45+Math.random()*10)+'%';s.style.top=(38+Math.random()*15)+'%';s.style.setProperty('--dx',((Math.random()-.5)*(big?380:250))+'px');s.style.setProperty('--dy',((Math.random()-.55)*(big?330:220))+'px');host.appendChild(s);setTimeout(()=>s.remove(),1100)}
+}
+function showOverlay(title,msg,button){
+ const o=document.createElement('div');o.className='overlay';o.innerHTML='<div class="panel"><h2>'+title+'</h2><p>'+msg+'</p><button type="button" class="primary">'+button+'</button></div>';$('board').appendChild(o);
+ o.querySelector('button').addEventListener('click',()=>{o.remove();tray=[];shuffleUsed=false;locked=false;$('shuffle').disabled=false;$('shuffle').textContent='🔀 섞기 1회';build();render();$('status').textContent='다시 시작! 위에 드러난 타일부터 골라봐!'})
+}
+$('hint').addEventListener('click',hint);$('shuffle').addEventListener('click',shuffleFree);
+$('stage').textContent=stage;$('score').textContent=score;build();render();
+})();
+</script>
+</body>
+</html>
